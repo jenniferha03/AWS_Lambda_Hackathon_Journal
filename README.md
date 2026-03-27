@@ -1,114 +1,124 @@
-# Empathy Journal – AI-Powered Mental Health Reflection
+# Empathy Journal — AI‑Powered Reflection & Habit Builder
 
-Empathy Journal is a secure, serverless journaling web app that helps users explore their emotions through AI-generated insights and behavioral trends. Built for the **AWS Lambda Hackathon 2025**, this project combines mental wellness with cutting-edge cloud tech.
+Empathy Journal is a journaling web app that helps users reflect, understand emotions, and build consistent writing habits. Users can write journal entries, generate AI insights (emotion, themes, summary, reflection prompts), and view trends like recent emotions and streak progress.
 
-# Live Demo: https://empathy-journal.vercel.app/
-<img width="1440" alt="image" src="https://github.com/user-attachments/assets/755a055a-8f59-4da3-ad60-b7253fb27d32" />
-
----
-
-### How We Used AWS Lambda
-
-The app uses AWS Lambda to handle Gemini-Powered journal analysis. When a user submits their journal entry and clicks **"Analyze with AI"**, the frontend sends a POST request to an API Gateway endpoint, which triggers a Lambda function. This Lambda function:
-
-1. Receives the journal entry
-2. Sends the text to Google's Gemini API
-3. Formats the response (emotion, themes, summary, prompts)
-4. Sends the result back to the frontend for display and storage
+- **Live demo**: `https://empathy-journal.vercel.app/`
 
 ---
 
-## AWS Services Used
+## Documentation (design + API)
 
-| Service        | Purpose |
-|----------------|---------|
-| AWS Lambda     | Serverless backend to run Gemini logic |
-| API Gateway    | Expose Lambda as RESTful HTTP endpoint |
-| CloudWatch     | Monitor and debug Lambda invocations |
-| IAM Roles      | Permission control for Lambda execution |
+See `docs/README.md` for:
+- Frontend design docs (theme, component inventory, page specs, Figma checklist)
+- Backend API contract + observability notes
 
 ---
 
-## Key Features
+## Repo structure (frontend + backend separated)
 
-- **Distraction-Free Journaling**  
-  Write in peace with a clean, minimal editor interface.
+This repository contains two independent parts:
 
-- **GPT-Powered Reflection**  
-  Each journal entry is analyzed by Google's Gemini API to detect:
+- **Frontend**: `empathy-journal-lambda/` (React + Vite + Tailwind + Firebase)
+- **Backend**: `backend/lambda/gptJournalAnalyzer/` (AWS Lambda handler for Gemini analysis)
 
-  - Emotional tone
-  - Repeating themes
-  - Suggestive questions to reflect deeper
-
-- **Mood & Behavior Tracking**
-
-  - Track mood over time
-  - Surface recurring thoughts and patterns
-  - Auto-generated weekly summaries
-
-- **Security & Privacy First**
-
-  - Client-side AES encryption (via Web Crypto API)
-  - Optional offline data export (`.zip` format)
-
-- **Serverless Backend with AWS Lambda**
-  - Gemini analysis handled via Lambda + API Gateway
-  - Firebase Firestore for real-time journal storage
-  - Zero backend server to manage
+This separation makes it easy for reviewers/interviewers to understand how the UI and the serverless AI function work independently.
 
 ---
 
-## Built With
+## What it does (non‑technical)
 
-| Category | Tech Stack                                      |
-| -------- | ----------------------------------------------- |
-| Cloud    | AWS Lambda, API Gateway, Firebase Hosting       |
-| AI       | Google's Gemini 1.5 Flash API                   |
-| Frontend | React, Vite, Tailwind CSS                       |
+Many people want to journal but struggle with consistency or don’t know how to “go deeper.” This app makes journaling easier by:
+- providing a calm writing space,
+- generating gentle reflection prompts via AI,
+- showing simple trends (recent emotions, streak progress) that help users stay motivated.
 
 ---
 
-## Local Development
+## Key features
 
-1. Clone the repo:
+- **Journaling + AI insights**
+  - Analyze an entry to generate: emotion, themes, short summary, reflection prompts
+- **Analytics**
+  - Emotion trends and recent emotions
+  - Streak / habit visualization
+- **Toolkit**
+  - Focus mode (Pomodoro), calm sounds, micro‑habits, study todo list
+- **Auth + profiles**
+  - Firebase Auth (email/password + Google)
+  - Profile settings (display name, pronouns, UI accent theme)
+
+---
+
+## How AI is implemented (AWS Lambda + API Gateway + Gemini)
+
+When the user clicks **Analyze with AI**, the frontend sends a `POST` request to an **API Gateway** endpoint, which triggers an **AWS Lambda** function. Lambda:
+1. Receives the journal text
+2. Calls the **Google Gemini API**
+3. Normalizes the response to a strict JSON schema (emotion, themes, summary, prompts)
+4. Returns the structured result to the frontend to display and save
+
+---
+
+## AWS services used
+
+| Service | Purpose |
+|--------|---------|
+| **AWS Lambda** | Serverless function for Gemini analysis logic |
+| **API Gateway** | HTTP endpoint that triggers Lambda |
+| **CloudWatch** | Logs + monitoring for Lambda invocations |
+| **IAM** | Permissions for Lambda execution |
+
+---
+
+## API testing (Hoppscotch)
+
+During development I used **Hoppscotch** to test the API Gateway endpoint (request payload, CORS, and response format) before wiring it into the React UI.
+
+---
+
+## Local development
+
+### Frontend
 
 ```bash
-git clone https://github.com/your-username/empathy-journal-lambda.git
 cd empathy-journal-lambda
-```
-
-2. Install frontend dependencies:
-
-```
 npm install
 npm run dev
 ```
 
-3. Create a .env file:
+Create `empathy-journal-lambda/.env`:
 
-```
-VITE_LAMBDA_URL=https://your-api-gateway-url
+```bash
+VITE_LAMBDA_URL="https://<your-api-gateway-endpoint>"
+VITE_FIREBASE_API_KEY="..."
+VITE_FIREBASE_AUTH_DOMAIN="..."
+VITE_FIREBASE_PROJECT_ID="..."
+VITE_FIREBASE_STORAGE_BUCKET="..."
+VITE_FIREBASE_MESSAGING_SENDER_ID="..."
+VITE_FIREBASE_APP_ID="..."
+VITE_FIREBASE_MEASUREMENT_ID="..."
 ```
 
-4. Start journaling and analyzing your thoughts
+### Backend (Lambda local invoke + smoke test)
+
+```bash
+cd backend/lambda/gptJournalAnalyzer
+npm install
+cp .env.example .env
+# set GEMINI_API_KEY in .env
+npm run invoke:local
+npm run test:smoke
+```
 
 ---
 
-## Challenges & Learnings
+## How I used an AI assistant (for interviews)
 
-- Configuring CORS correctly between Lambda and the frontend
-- Making Gemini responses consistent + parseable
-- Styling responsive UI with Tailwind CSS
-- Handling async + loading states while calling AI
+I used an AI assistant to speed up development tasks such as:
+- refactoring folder structure and updating imports safely,
+- improving theme consistency across light/dark modes,
+- implementing demo tools to seed realistic presentation data,
+- debugging issues (build/import failures, real-time Firestore updates).
 
+I reviewed and adjusted suggestions to match project constraints (Firebase/Auth edge cases, Tailwind dark-mode behavior, Firestore `onSnapshot` listeners).
 
----
-
-## Future Plans
-
-- Weekly emotion summaries
-- Mood trend charts with Chart.js
-- Offline-first mode (PWA)
-- Export to PDF or Markdown
-- AI-generated gratitude prompts

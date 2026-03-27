@@ -1,6 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const MODEL_NAME = "gemini-1.5-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 const corsHeaders = {
   "Content-Type": "application/json",
@@ -17,33 +15,51 @@ function response(statusCode, body) {
   };
 }
 
-function extractJson(text) {
-  if (!text || typeof text !== "string") {
-    throw new Error("Gemini returned an empty response.");
+function parseJsonBody(body) {
+  if (typeof body !== "string") return body || {};
+  try {
+    return JSON.parse(body);
+  } catch {
+    return {};
   }
+}
 
-  const cleaned = text
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
+function normalizeModelName(model) {
+  const raw = (model || "").trim();
+  if (!raw) return DEFAULT_MODEL;
+  return raw.replace(/^models\//, "");
+}
 
-  const firstBrace = cleaned.indexOf("{");
-  const lastBrace = cleaned.lastIndexOf("}");
-  const jsonString =
-    firstBrace >= 0 && lastBrace >= 0
-      ? cleaned.slice(firstBrace, lastBrace + 1)
-      : cleaned;
+function extractJson(text) {
+  if (!text || typeof text !== "string") throw new Error("Empty Gemini response");
+  const cleaned = text.replace(/```json|```/gi, "").trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  return JSON.parse(match ? match[0] : cleaned);
+}
 
-  return JSON.parse(jsonString);
+function normalizePrompts(value) {
+  const raw = Array.isArray(value) ? value : [];
+  const cleaned = raw
+    .filter((x) => typeof x === "string")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const fallback = [
+    "What is one small next step you can take today?",
+    "What helped you cope, even a little?",
+    "What would you tell a friend feeling the same way?",
+  ];
+
+  const out = cleaned.slice(0, 3);
+  for (let i = out.length; i < 3; i += 1) out.push(fallback[i]);
+  return out;
 }
 
 function normalizeOutput(parsed) {
   return {
     emotion: typeof parsed?.emotion === "string" ? parsed.emotion : "Unknown",
     themes: Array.isArray(parsed?.themes) ? parsed.themes : [],
-    reflection_prompts: Array.isArray(parsed?.reflection_prompts)
-      ? parsed.reflection_prompts
-      : [],
+    reflection_prompts: normalizePrompts(parsed?.reflection_prompts),
     summary: typeof parsed?.summary === "string" ? parsed.summary : "",
   };
 }
@@ -56,23 +72,18 @@ exports.handler = async (event) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return response(500, { error: "Missing GEMINI_API_KEY in Lambda environment." });
+      console.error("Gemini configuration error: missing GEMINI_API_KEY");
+      return response(500, { error: "Unable to process your request right now." });
     }
 
-    const body = typeof event?.body === "string" ? JSON.parse(event.body) : event?.body || {};
+    const body = parseJsonBody(event?.body);
     const journal = typeof body?.journal === "string" ? body.journal.trim() : "";
 
     if (!journal) {
       return response(400, { error: "Missing required field: journal" });
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      // Force stable API version v1 to avoid v1beta model mismatch issues.
-      apiVersion: "v1",
-    });
-
+    const modelName = normalizeModelName(process.env.GEMINI_MODEL);
     const prompt = `
 You are a mental wellness reflection assistant.
 Analyze the following journal entry and return STRICTLY valid JSON with this exact schema:
@@ -93,8 +104,29 @@ Journal entry:
 ${journal}
 `.trim();
 
-    const result = await model.generateContent(prompt);
-    const text = result?.response?.text?.() || "";
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`;
+    const geminiRes = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      }),
+    });
+
+    const geminiData = await geminiRes.json();
+    if (!geminiRes.ok || geminiData?.error) {
+      console.error("Gemini API error:", geminiData?.error || geminiData);
+      const status = geminiData?.error?.status;
+      if (status === "NOT_FOUND") {
+        return response(500, { error: "Configured Gemini model is not available." });
+      }
+      if (status === "RESOURCE_EXHAUSTED") {
+        return response(429, { error: "Gemini quota exceeded. Please try again later." });
+      }
+      return response(502, { error: "Unable to process your request right now." });
+    }
+
+    const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
     const parsed = extractJson(text);
     const normalized = normalizeOutput(parsed);
 

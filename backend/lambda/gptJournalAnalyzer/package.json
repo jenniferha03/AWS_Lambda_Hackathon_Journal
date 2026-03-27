@@ -1,0 +1,15 @@
+{
+  "name": "gpt-journal-analyzer-lambda",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "check": "node -c index.js",
+    "invoke:local": "node invoke-local.js",
+    "test:smoke": "node smoke-test.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "latest"
+  }
+}
+
