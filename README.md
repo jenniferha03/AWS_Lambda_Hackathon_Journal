@@ -1,82 +1,72 @@
-# Empathy Journal — AI‑Powered Reflection & Habit Builder
+# Empathy Journal: Reflection.ai
 
-Empathy Journal is a journaling web app that helps users reflect, understand emotions, and build consistent writing habits. Users can write journal entries, generate AI insights (emotion, themes, summary, reflection prompts), and view trends like recent emotions and streak progress.
+Empathy Journal is a journaling web app that helps users reflect, understand emotional patterns, and build consistent writing habits. It combines a calm writing experience with AI-generated insights and simple wellness tools.
 
 - **Live demo**: `https://empathy-journal.vercel.app/`
 
----
+## Screenshot
 
-## Documentation (design + API)
-
-See `docs/README.md` for:
-- Frontend design docs (theme, component inventory, page specs, Figma checklist)
-- Backend API contract + observability notes
+![Landing page](./docs/assets/landing-photo.png)
 
 ---
 
-## Repo structure (frontend + backend separated)
+## Architecture
 
-This repository contains two independent parts:
+- **Frontend**: `empathy-journal-lambda/`  
+  React + Vite + Tailwind + Firebase Auth/Firestore
+- **Backend**: `backend/lambda/gptJournalAnalyzer/`  
+  AWS Lambda function behind API Gateway for Gemini analysis
 
-- **Frontend**: `empathy-journal-lambda/` (React + Vite + Tailwind + Firebase)
-- **Backend**: `backend/lambda/gptJournalAnalyzer/` (AWS Lambda handler for Gemini analysis)
+### Request flow
 
-This separation makes it easy for reviewers/interviewers to understand how the UI and the serverless AI function work independently.
-
----
-
-## What it does (non‑technical)
-
-Many people want to journal but struggle with consistency or don’t know how to “go deeper.” This app makes journaling easier by:
-- providing a calm writing space,
-- generating gentle reflection prompts via AI,
-- showing simple trends (recent emotions, streak progress) that help users stay motivated.
+1. User writes a journal entry and clicks **Analyze with AI**
+2. Frontend sends `POST` request to API Gateway (`VITE_LAMBDA_URL`)
+3. API Gateway triggers Lambda
+4. Lambda calls Gemini and normalizes output schema
+5. Frontend renders insight and can save to Firestore
 
 ---
 
-## Key features
+## Tech Stack
 
-- **Journaling + AI insights**
-  - Analyze an entry to generate: emotion, themes, short summary, reflection prompts
+- **Frontend**: React, Vite, Tailwind CSS, React Router
+- **Auth / Database**: Firebase Auth, Firestore
+- **Backend**: AWS Lambda (Node.js), API Gateway
+- **AI**: Google Gemini (`gemini-2.5-flash`)
+- **Observability / Testing**: CloudWatch Logs, Hoppscotch, local smoke test script
+- **Deployment**: Vercel (frontend), AWS Lambda (backend)
+
+---
+
+## Features
+
+- **Journaling + AI Insight**
+  - Analyze entries for emotion, themes, summary, and reflection prompts
 - **Analytics**
-  - Emotion trends and recent emotions
-  - Streak / habit visualization
+  - Emotion trend view and recent emotion chips
+  - Streak visualization for writing consistency
 - **Toolkit**
-  - Focus mode (Pomodoro), calm sounds, micro‑habits, study todo list
-- **Auth + profiles**
-  - Firebase Auth (email/password + Google)
-  - Profile settings (display name, pronouns, UI accent theme)
+  - Focus mode (Pomodoro), calm sounds, micro-habits, study todo list
+- **Authentication + Profile**
+  - Email/password + Google login
+  - User profile + UI theme preferences
+- **Demo Helpers**
+  - DEV-only demo seeding tools for presentation
 
 ---
 
-## How AI is implemented (AWS Lambda + API Gateway + Gemini)
+## AWS + AI Implementation Notes
 
-When the user clicks **Analyze with AI**, the frontend sends a `POST` request to an **API Gateway** endpoint, which triggers an **AWS Lambda** function. Lambda:
-1. Receives the journal text
-2. Calls the **Google Gemini API**
-3. Normalizes the response to a strict JSON schema (emotion, themes, summary, prompts)
-4. Returns the structured result to the frontend to display and save
+Because this project was built for an AWS hackathon, the serverless backend is intentionally explicit:
 
----
-
-## AWS services used
-
-| Service | Purpose |
-|--------|---------|
-| **AWS Lambda** | Serverless function for Gemini analysis logic |
-| **API Gateway** | HTTP endpoint that triggers Lambda |
-| **CloudWatch** | Logs + monitoring for Lambda invocations |
-| **IAM** | Permissions for Lambda execution |
+- Lambda validates input and handles CORS
+- Lambda calls Gemini and enforces a stable JSON output schema
+- `reflection_prompts` is normalized to exactly 3 items for UI consistency
+- Errors are mapped to user-safe responses (`400`, `429`, `500/502`)
 
 ---
 
-## API testing (Hoppscotch)
-
-During development I used **Hoppscotch** to test the API Gateway endpoint (request payload, CORS, and response format) before wiring it into the React UI.
-
----
-
-## Local development
+## Local Development
 
 ### Frontend
 
@@ -112,13 +102,27 @@ npm run test:smoke
 
 ---
 
-## How I used an AI assistant (for interviews)
+## Documentation Index
 
-I used an AI assistant to speed up development tasks such as:
-- refactoring folder structure and updating imports safely,
-- improving theme consistency across light/dark modes,
-- implementing demo tools to seed realistic presentation data,
-- debugging issues (build/import failures, real-time Firestore updates).
+For full design and implementation docs, see:
 
-I reviewed and adjusted suggestions to match project constraints (Firebase/Auth edge cases, Tailwind dark-mode behavior, Firestore `onSnapshot` listeners).
+- `docs/README.md`
+- Frontend:
+  - `docs/frontend/figma.md`
+  - `docs/frontend/theme.md`
+  - `docs/frontend/components.md`
+  - `docs/frontend/pages/*.md`
+- Backend:
+  - `docs/backend/api.md`
+  - `docs/backend/implementation.md`
+  - `docs/backend/observability.md`
 
+---
+
+## Future Roadmap
+
+- Add route-level code splitting and further bundle optimization
+- Improve AI reliability UX (retry/fallback handling on quota/timeouts)
+- Expand test coverage (frontend components + API contract checks)
+- Add offline draft support (PWA-style behavior)
+- Support richer export options (PDF/Markdown)
