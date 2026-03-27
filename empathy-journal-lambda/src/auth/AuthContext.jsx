@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -10,6 +10,7 @@ import {
 import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { auth, googleProvider } from "../lib/firebase";
 import { db } from "../lib/firebase";
+import { splitFullName } from "../utils/profileNames";
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,21 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uiTheme, setUiTheme] = useState("Calm");
+  const [profileFirstName, setProfileFirstName] = useState("");
+  const [profileLastName, setProfileLastName] = useState("");
+
+  const applyUserProfileDoc = (data, authDisplayName) => {
+    const fn = String(data?.firstName ?? "").trim();
+    const ln = String(data?.lastName ?? "").trim();
+    if (fn || ln) {
+      setProfileFirstName(fn);
+      setProfileLastName(ln);
+      return;
+    }
+    const merged = splitFullName(authDisplayName || data?.displayName || "");
+    setProfileFirstName(merged.firstName);
+    setProfileLastName(merged.lastName);
+  };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -29,6 +45,8 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!user?.uid) {
       setUiTheme("Calm");
+      setProfileFirstName("");
+      setProfileLastName("");
       return;
     }
     const load = async () => {
@@ -36,13 +54,29 @@ export function AuthProvider({ children }) {
         const snap = await getDoc(doc(db, "user_profiles", user.uid));
         const data = snap.data() || {};
         setUiTheme(data.theme || "Calm");
+        applyUserProfileDoc(data, user.displayName);
       } catch (e) {
         console.error("Error loading ui theme:", e);
         setUiTheme("Calm");
+        applyUserProfileDoc({}, user.displayName);
       }
     };
     load();
-  }, [user?.uid]);
+  }, [user?.uid, user?.displayName]);
+
+  const refreshUserProfile = useCallback(async () => {
+    const u = auth.currentUser;
+    if (!u?.uid) return;
+    try {
+      const snap = await getDoc(doc(db, "user_profiles", u.uid));
+      const data = snap.data() || {};
+      setUiTheme(data.theme || "Calm");
+      applyUserProfileDoc(data, u.displayName);
+    } catch (e) {
+      console.error("Error refreshing user profile:", e);
+      applyUserProfileDoc({}, u.displayName);
+    }
+  }, []);
 
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
   const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
@@ -65,6 +99,9 @@ export function AuthProvider({ children }) {
       loading,
       uiTheme,
       setUiTheme,
+      profileFirstName,
+      profileLastName,
+      refreshUserProfile,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
       signup: async (name, email, password) => {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -83,7 +120,7 @@ export function AuthProvider({ children }) {
       },
       getIdToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : ""),
     }),
-    [user, loading, uiTheme, isDemoUser],
+    [user, loading, uiTheme, profileFirstName, profileLastName, refreshUserProfile, isDemoUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

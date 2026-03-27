@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import PageFade from "../components/PageFade";
+import PasswordInput from "../components/PasswordInput";
 import { getLastEmail, getRecentEmails, rememberEmail, removeRememberedEmail } from "../utils/recentEmails";
 
 export default function LoginPage() {
@@ -15,7 +16,9 @@ export default function LoginPage() {
   const location = useLocation();
   const redirectTo = location.state?.from?.pathname || "/app/dashboard";
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || "DemoPass!234";
+  const demoPassword = import.meta.env.DEV
+    ? import.meta.env.VITE_DEMO_PASSWORD || "DemoPass!234"
+    : "";
 
   useEffect(() => {
     const remembered = getLastEmail();
@@ -66,14 +69,11 @@ export default function LoginPage() {
             placeholder="Email"
             className="w-full border border-amber-100 dark:border-slate-700 rounded-lg px-3 py-2 bg-white/90 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-emerald-300/40"
           />
-          <input
-            name="password"
-            autoComplete="current-password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            type="password"
+            autoComplete="current-password"
             placeholder="Password"
-            className="w-full border border-amber-100 dark:border-slate-700 rounded-lg px-3 py-2 bg-white/90 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-emerald-300/40"
           />
           <button
             disabled={loading}

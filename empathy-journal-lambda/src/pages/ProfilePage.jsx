@@ -4,13 +4,15 @@ import { updateProfile } from "firebase/auth";
 import PageFade from "../components/PageFade";
 import { useAuth } from "../auth/AuthContext";
 import { db } from "../lib/firebase";
+import { combineFullName, splitFullName } from "../utils/profileNames";
 
 export default function ProfilePage() {
-  const { user, setUiTheme } = useAuth();
+  const { user, setUiTheme, refreshUserProfile } = useAuth();
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
   const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
 
-  const [displayName, setDisplayName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [bio, setBio] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [theme, setTheme] = useState("Calm");
@@ -24,7 +26,16 @@ export default function ProfilePage() {
       try {
         const snap = await getDoc(doc(db, "user_profiles", user.uid));
         const data = snap.data() || {};
-        setDisplayName(user.displayName || data.displayName || "");
+        const fn = String(data.firstName ?? "").trim();
+        const ln = String(data.lastName ?? "").trim();
+        if (fn || ln) {
+          setFirstName(fn);
+          setLastName(ln);
+        } else {
+          const merged = splitFullName(user.displayName || data.displayName || "");
+          setFirstName(merged.firstName);
+          setLastName(merged.lastName);
+        }
         setBio(data.bio || "");
         setPronouns(data.pronouns || "");
         setTheme(data.theme || "Calm");
@@ -39,16 +50,18 @@ export default function ProfilePage() {
 
   const saveProfile = async () => {
     if (!user?.uid) return;
+    const fullName = combineFullName(firstName, lastName) || user.displayName || "User";
     setSaving(true);
     try {
-      await updateProfile(user, {
-        displayName: displayName || user.displayName || "User",
-      });
+      await updateProfile(user, { displayName: fullName });
+      await user.reload?.();
 
       await setDoc(
         doc(db, "user_profiles", user.uid),
         {
-          displayName: displayName || user.displayName || "User",
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          displayName: fullName,
           email: user.email || "",
           bio,
           pronouns,
@@ -60,6 +73,7 @@ export default function ProfilePage() {
         { merge: true },
       );
       setUiTheme(theme);
+      await refreshUserProfile();
 
       alert("Profile updated.");
     } catch (error) {
@@ -73,6 +87,8 @@ export default function ProfilePage() {
   const fillDemoProfile = async () => {
     if (!user?.uid) return;
     const demo = {
+      firstName: "Demo User",
+      lastName: "",
       displayName: "Demo User",
       pronouns: "they/them",
       theme: "Cozy",
@@ -82,7 +98,8 @@ export default function ProfilePage() {
       spotifyLink: "https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0",
     };
 
-    setDisplayName(demo.displayName);
+    setFirstName(demo.firstName);
+    setLastName(demo.lastName);
     setPronouns(demo.pronouns);
     setTheme(demo.theme);
     setBio(demo.bio);
@@ -97,6 +114,8 @@ export default function ProfilePage() {
       await setDoc(
         doc(db, "user_profiles", user.uid),
         {
+          firstName: demo.firstName,
+          lastName: demo.lastName,
           displayName: demo.displayName,
           email: user.email || "",
           bio: demo.bio,
@@ -109,6 +128,7 @@ export default function ProfilePage() {
         { merge: true },
       );
       setUiTheme(demo.theme);
+      await refreshUserProfile();
       alert("Demo profile filled.");
     } catch (error) {
       console.error("Error filling demo profile:", error);
@@ -140,20 +160,35 @@ export default function ProfilePage() {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="space-y-3">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-orange-200 text-amber-800 border border-amber-100 dark:border-slate-700 flex items-center justify-center text-2xl font-semibold dark:!bg-emerald-300/20 dark:!text-[#AAF0D1]">
-                {(displayName || user?.displayName || user?.email || "U").slice(0, 1).toUpperCase()}
+                {(firstName || user?.displayName || user?.email || "U").slice(0, 1).toUpperCase()}
               </div>
               <p className="text-xs text-slate-500">Default avatar mode (free tier friendly).</p>
             </div>
 
             <div className="md:col-span-2 grid gap-3">
-              <div>
-                <p className="text-sm text-slate-500 mb-1">Display Name</p>
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2"
-                  placeholder="Your name"
-                />
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">First name</p>
+                  <p className="text-xs text-slate-400 mb-1">Shown in greetings</p>
+                  <input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2"
+                    placeholder="First name"
+                    autoComplete="given-name"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Last name</p>
+                  <p className="text-xs text-slate-400 mb-1">Used for full name</p>
+                  <input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2"
+                    placeholder="Last name"
+                    autoComplete="family-name"
+                  />
+                </div>
               </div>
               <div>
                 <p className="text-sm text-slate-500 mb-1">Pronouns</p>

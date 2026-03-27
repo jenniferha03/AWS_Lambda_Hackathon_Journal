@@ -15,6 +15,7 @@ import {
 import { db } from "../lib/firebase";
 import PageFade from "../components/PageFade";
 import { useAuth } from "../auth/AuthContext";
+import { greetingFromProfile } from "../utils/profileNames";
 
 function todayKey() {
   const d = new Date();
@@ -138,7 +139,7 @@ function MiniCalendar({ markedDays }) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, profileFirstName } = useAuth();
   const [posts, setPosts] = useState([]);
   const [journals, setJournals] = useState([]);
   const [text, setText] = useState("");
@@ -146,12 +147,10 @@ export default function DashboardPage() {
   const [saving, setSaving] = useState(false);
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
   const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
-  const userLabel = useMemo(() => {
-    const raw = (user?.displayName || user?.email || "").trim();
-    if (!raw) return "there";
-    const base = raw.includes("@") ? raw.split("@")[0] : raw;
-    return base ? base.charAt(0).toUpperCase() + base.slice(1) : "there";
-  }, [user?.displayName, user?.email]);
+  const userLabel = useMemo(
+    () => greetingFromProfile(profileFirstName, user?.displayName, user?.email),
+    [profileFirstName, user?.displayName, user?.email],
+  );
 
   const prompts = useMemo(
     () => [

@@ -4,6 +4,7 @@ import { addDoc, collection, deleteDoc, doc, getDocs, query, Timestamp, where } 
 import { useAuth } from "../auth/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import { db } from "../lib/firebase";
+import { greetingFromProfile } from "../utils/profileNames";
 
 const links = [
   { to: "/app/dashboard", label: "Dashboard" },
@@ -13,17 +14,25 @@ const links = [
 ];
 
 export default function AppLayout() {
-  const { user, logout, uiTheme } = useAuth();
+  const { user, logout, uiTheme, profileFirstName, profileLastName } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(false);
   const [demoWorking, setDemoWorking] = useState(false);
   const initials = useMemo(() => {
+    const fn = String(profileFirstName || "").trim();
+    const ln = String(profileLastName || "").trim();
+    if (fn && ln) return `${fn[0]}${ln[0]}`.toUpperCase();
     const base = user?.displayName || user?.email || "U";
     const parts = base.trim().split(/\s+/).filter(Boolean);
     if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     return base.slice(0, 2).toUpperCase();
-  }, [user?.displayName, user?.email]);
+  }, [profileFirstName, profileLastName, user?.displayName, user?.email]);
+
+  const greetingName = useMemo(
+    () => greetingFromProfile(profileFirstName, user?.displayName, user?.email),
+    [profileFirstName, user?.displayName, user?.email],
+  );
 
   const goProfile = () => {
     setOpenPanel(false);
@@ -225,7 +234,7 @@ export default function AppLayout() {
               >
                 {user?.photoURL ? <img src={user.photoURL} alt="avatar" className="w-full h-full object-cover" /> : initials}
               </div>
-              <span className={`text-base font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}>{user?.displayName || user?.email || "User"}</span>
+              <span className={`text-base font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`}>{greetingName}</span>
             </button>
           </div>
         </nav>
@@ -254,7 +263,7 @@ export default function AppLayout() {
                 {user?.photoURL ? <img src={user.photoURL} alt="avatar" className="w-full h-full object-cover" /> : initials}
               </div>
               <div>
-                <p className="font-medium text-slate-900 dark:text-slate-100">{user?.displayName || user?.email || "User"}</p>
+                <p className="font-medium text-slate-900 dark:text-slate-100">{greetingName}</p>
                 <p className="text-xs text-slate-600 dark:text-slate-300">{user?.email || "No email"}</p>
               </div>
             </div>
