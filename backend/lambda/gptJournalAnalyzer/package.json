@@ -9,7 +9,7 @@
     "test:smoke": "node smoke-test.js"
   },
   "dependencies": {
-    "@google/generative-ai": "latest"
+    "@google/generative-ai": "latest",
+    "firebase-admin": "^13.7.0"
   }
 }
-

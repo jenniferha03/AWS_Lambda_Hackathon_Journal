@@ -11,11 +11,28 @@
 Deployed behind **API Gateway**. The frontend uses:
 
 - `VITE_LAMBDA_URL` (example): `https://<api-gateway-id>.execute-api.<region>.amazonaws.com/<stage>/analyze`
+- `VITE_DEMO_LOGIN_URL` (optional explicit override): `https://<api-gateway-id>.execute-api.<region>.amazonaws.com/<stage>/demo-login`
 
 ## Method
 
 - `POST`
 - `Content-Type: application/json`
+
+## Demo login endpoint
+
+`POST /demo-login`
+
+Request body: none
+
+Successful response:
+
+```json
+{
+  "customToken": "string"
+}
+```
+
+Use this token with Firebase `signInWithCustomToken` on the frontend.
 
 ## Request body
 
@@ -64,4 +81,6 @@ Lambda returns permissive CORS headers for browser usage:
 
 - `GEMINI_API_KEY` (required)
 - `GEMINI_MODEL` (optional, default: `gemini-2.5-flash`)
+- `FIREBASE_SERVICE_ACCOUNT_JSON` (required for `/demo-login`)
+- `DEMO_UID` (required for `/demo-login`)
 

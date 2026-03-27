@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithCustomToken,
   signInWithPopup,
   signOut,
   updateProfile,
@@ -93,6 +94,15 @@ export function AuthProvider({ children }) {
     ]);
   };
 
+  const resolveDemoLoginUrl = () => {
+    const explicit = String(import.meta.env.VITE_DEMO_LOGIN_URL || "").trim();
+    if (explicit) return explicit;
+    const lambdaUrl = String(import.meta.env.VITE_LAMBDA_URL || "").trim();
+    if (!lambdaUrl) return "";
+    if (lambdaUrl.endsWith("/analyze")) return `${lambdaUrl.slice(0, -"/analyze".length)}/demo-login`;
+    return `${lambdaUrl.replace(/\/$/, "")}/demo-login`;
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -107,6 +117,19 @@ export function AuthProvider({ children }) {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         if (name) await updateProfile(cred.user, { displayName: name });
         return cred;
+      },
+      demoLogin: async () => {
+        const demoUrl = resolveDemoLoginUrl();
+        if (!demoUrl) throw new Error("Missing demo login endpoint URL.");
+        const res = await fetch(demoUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || !body?.customToken) {
+          throw new Error(body?.error || "Demo login failed.");
+        }
+        return signInWithCustomToken(auth, body.customToken);
       },
       loginWithGoogle: () => signInWithPopup(auth, googleProvider),
       logout: async () => {

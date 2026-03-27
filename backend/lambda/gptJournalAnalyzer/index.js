@@ -1,4 +1,5 @@
 const DEFAULT_MODEL = "gemini-2.5-flash";
+const admin = require("firebase-admin");
 
 const corsHeaders = {
   "Content-Type": "application/json",
@@ -6,6 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type,Authorization",
   "Access-Control-Allow-Methods": "OPTIONS,POST",
 };
+
+let firebaseApp = null;
 
 function response(statusCode, body) {
   return {
@@ -64,9 +67,48 @@ function normalizeOutput(parsed) {
   };
 }
 
+function getRequestPath(event) {
+  return String(event?.rawPath || event?.path || event?.resource || "").toLowerCase();
+}
+
+function getFirebaseApp() {
+  if (firebaseApp) return firebaseApp;
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(raw);
+  } catch {
+    throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT_JSON");
+  }
+  firebaseApp = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+  return firebaseApp;
+}
+
+async function handleDemoLogin() {
+  const demoUid = String(process.env.DEMO_UID || "").trim();
+  if (!demoUid) {
+    return response(500, { error: "Demo login is not configured." });
+  }
+  try {
+    const app = getFirebaseApp();
+    const customToken = await admin.auth(app).createCustomToken(demoUid, { demo: true });
+    return response(200, { customToken });
+  } catch (error) {
+    console.error("Demo login token error:", error);
+    return response(500, { error: "Demo login is not available right now." });
+  }
+}
+
 exports.handler = async (event) => {
   if (event?.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: corsHeaders, body: "" };
+  }
+  const requestPath = getRequestPath(event);
+  if (requestPath.includes("demo-login")) {
+    return handleDemoLogin();
   }
 
   try {

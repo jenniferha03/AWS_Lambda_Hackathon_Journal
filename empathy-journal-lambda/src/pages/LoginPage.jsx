@@ -6,7 +6,7 @@ import PasswordInput from "../components/PasswordInput";
 import { getLastEmail, getRecentEmails, rememberEmail, removeRememberedEmail } from "../utils/recentEmails";
 
 export default function LoginPage() {
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, demoLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [savedEmail, setSavedEmail] = useState("");
@@ -16,9 +16,7 @@ export default function LoginPage() {
   const location = useLocation();
   const redirectTo = location.state?.from?.pathname || "/app/dashboard";
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const demoPassword = import.meta.env.DEV
-    ? import.meta.env.VITE_DEMO_PASSWORD || "DemoPass!234"
-    : "";
+  const canUseDemoLogin = Boolean(import.meta.env.VITE_DEMO_LOGIN_URL || import.meta.env.VITE_LAMBDA_URL);
 
   useEffect(() => {
     const remembered = getLastEmail();
@@ -82,16 +80,26 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
-        {import.meta.env.DEV ? (
+        {canUseDemoLogin ? (
           <button
             type="button"
-            onClick={() => {
-              setEmail(demoEmail);
-              setPassword(demoPassword);
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const cred = await demoLogin();
+                if (cred?.user?.email) rememberEmail(cred.user.email);
+                navigate(redirectTo, { replace: true });
+              } catch (error) {
+                console.error(error);
+                alert("Demo login failed.");
+              } finally {
+                setLoading(false);
+              }
             }}
+            disabled={loading}
             className="mt-3 w-full rounded-lg bg-orange-100 text-amber-900 border border-amber-100 py-2 hover:bg-orange-200 transition transform-gpu hover:-translate-y-0.5 hover:shadow-sm dark:!bg-slate-900/35 dark:!text-slate-100 dark:!border-slate-700 dark:hover:!bg-slate-900/55"
           >
-            Use demo account (auto-fill)
+            {loading ? "Signing in demo..." : `Use demo account (${demoEmail})`}
           </button>
         ) : null}
         <button
