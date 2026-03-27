@@ -1,15 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  --pastel-bg: #fff8f1;
+  --pastel-paper: #ffffff;
+  --pastel-ink: #334155;
+  --pastel-accent: #fdba74;
+  --pastel-accent-2: #a7f3d0;
 
-  color-scheme: light dark;
-  /* color: rgba(255, 255, 255, 0.87);
-  background-color: #242424; */
+  /* UI Theme accent tokens (Calm/Cozy/Focus). Light/Dark mode still controlled by `ThemeContext`. */
+  --ui-accent-soft: #ffedd5; /* orange-100 */
+  --ui-accent: #fcd34d; /* amber-300 */
+  --ui-accent-ink: #b45309; /* amber-700 */
+  --ui-accent-ink-strong: #92400e; /* amber-800 */
+  --ui-accent-btn: #fde68a; /* amber-200 */
+  --ui-accent-btn-hover: #fcd34d; /* amber-300 */
+  --ui-accent-border: #ffedd5; /* orange-100 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -17,56 +29,163 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+html.accent-cozy {
+  /* Cozy = warm peach (avoid "red" feel) */
+  --ui-accent-soft: #fff7ed; /* orange-50 */
+  --ui-accent: #ffd9b0; /* soft peach */
+  --ui-accent-ink: #8c4216; /* deep peach */
+  --ui-accent-ink-strong: #7a3412; /* amber-900-ish */
+  --ui-accent-btn: #ffe6c9; /* lighter peach */
+  --ui-accent-btn-hover: #ffd9b0; /* soft peach */
+  --ui-accent-border: #ffedd5; /* orange-100 */
 }
-a:hover {
-  color: #535bf2;
+
+html.accent-focus {
+  --ui-accent-soft: #ecfeff; /* cyan-50 */
+  --ui-accent: #a5f3fc; /* cyan-200 */
+  --ui-accent-ink: #0e7490; /* cyan-700 */
+  --ui-accent-ink-strong: #155e75; /* cyan-800 */
+  --ui-accent-btn: #cffafe; /* cyan-100 */
+  --ui-accent-btn-hover: #a5f3fc; /* cyan-200 */
+  --ui-accent-border: #cffafe; /* cyan-100 */
+}
+
+/* In dark mode, keep the app's "mint primary" consistent. */
+.dark {
+  --ui-accent-soft: rgba(170, 240, 209, 0.16);
+  --ui-accent: #aaf0d1;
+  --ui-accent-ink: #aaf0d1;
+  --ui-accent-ink-strong: #d6fff0;
+  --ui-accent-btn: #aaf0d1;
+  --ui-accent-btn-hover: #d6fff0;
+  --ui-accent-border: rgba(148, 163, 184, 0.35);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  color: #1f2937;
+  background: radial-gradient(circle at top right, #ffe7d0 0%, #fff8f1 42%, #f8fffb 100%);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+* {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 220ms ease;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: 0.01em;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+::selection {
+  background: #ddd6fe;
+  color: #312e81;
+}
+
+.dark body {
+  background: radial-gradient(circle at top right, #2f1f16 0%, #16191f 42%, #13211d 100%);
+  color: #e2e8f0;
+}
+
+.dark .bg-white {
+  background-color: #151a20 !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #1a2228 !important;
+}
+
+.dark .bg-blue-50,
+.dark .bg-indigo-50,
+.dark .bg-violet-50,
+.dark .bg-emerald-50 {
+  background-color: #182126 !important;
+}
+
+.dark .bg-violet-100,
+.dark .bg-indigo-100 {
+  background-color: #5f3b23 !important;
+}
+
+.dark .bg-violet-200,
+.dark .bg-indigo-200 {
+  background-color: #7c4a2a !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: #064e3b !important;
+}
+
+.dark .bg-emerald-200 {
+  background-color: #065f46 !important;
+}
+
+.dark .bg-emerald-300 {
+  background-color: #047857 !important;
+}
+
+.dark .bg-rose-100 {
+  background-color: #7f1d1d !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-indigo-700,
+.dark .text-violet-700,
+.dark .text-emerald-700,
+.dark .text-rose-700 {
+  color: #fdba74 !important;
+}
+
+.dark .border-slate-200,
+.dark .border-violet-100,
+.dark .border-blue-100 {
+  border-color: #374151 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #111827 !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+/* Improve readability for pastel accent blocks */
+.text-indigo-700,
+.text-violet-700 {
+  color: #b45309;
+}
+
+.dark .bg-violet-100,
+.dark .bg-indigo-100 {
+  background-color: #5f3b23 !important;
+}
+
+.dark .bg-violet-200,
+.dark .bg-indigo-200 {
+  background-color: #7c4a2a !important;
 }
