@@ -68,18 +68,28 @@ export default function SignupPage() {
     try {
       const cred = await signup(displayName, email.trim(), password);
       if (cred?.user?.uid) {
-        await setDoc(
-          doc(db, "user_profiles", cred.user.uid),
-          {
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            displayName,
-            email: email.trim(),
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true },
-        );
-        await refreshUserProfile();
+        try {
+          await setDoc(
+            doc(db, "user_profiles", cred.user.uid),
+            {
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
+              displayName,
+              email: email.trim(),
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true },
+          );
+          await refreshUserProfile();
+        } catch (fsErr) {
+          console.error(fsErr);
+          const fc = fsErr?.code || "";
+          alert(
+            fc === "permission-denied"
+              ? "Your account was created, but Firestore blocked saving your profile (permission-denied). In Firebase Console → Firestore → Rules, allow users to write their own user_profiles/{userId} document. See firestore.rules in this repo for an example."
+              : `Account created, but profile save failed (${fc || fsErr?.message || "unknown"}). You can still use the app; try filling Profile later.`,
+          );
+        }
       }
       if (rememberEmail) {
         rememberEmailOnDevice(email.trim());
@@ -88,7 +98,15 @@ export default function SignupPage() {
       navigate("/app/dashboard", { replace: true });
     } catch (error) {
       console.error(error);
-      alert("Signup failed.");
+      const code = error?.code || "";
+      const hints = {
+        "auth/email-already-in-use": "This email already has an account. Try logging in instead.",
+        "auth/invalid-email": "That email address looks invalid.",
+        "auth/weak-password": "Password is too weak for Firebase.",
+        "auth/operation-not-allowed": "Email/password sign-in is disabled in Firebase Console.",
+      };
+      const extra = hints[code] ? ` ${hints[code]}` : "";
+      alert(`${code ? `${code}: ` : ""}${error?.message || "Signup failed."}${extra}`);
     } finally {
       setLoading(false);
     }
