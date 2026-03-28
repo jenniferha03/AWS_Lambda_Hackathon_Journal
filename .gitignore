@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# Lambda deployment artifacts (upload to AWS manually)
+backend/lambda/gptJournalAnalyzer/lambda-deploy.zip
