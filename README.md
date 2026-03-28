@@ -32,7 +32,7 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 
 - **Frontend**: React, Vite, Tailwind CSS, React Router
 - **Auth / Database**: Firebase Auth, Firestore
-- **Backend**: AWS Lambda (Node.js), API Gateway, Firebase Admin (e.g. demo custom tokens), `@google/generative-ai` (Gemini client)
+- **Backend**: AWS Lambda (Node.js), API Gateway, Firebase Admin (e.g. demo custom tokens), `@google/generative-ai` (JavaScript SDK for the **Gemini API**)
 - **AI**: Google Gemini (`gemini-2.5-flash`)
 - **Observability / Testing**: CloudWatch Logs, Postman/Hoppscotch, local smoke test script
 - **Deployment**: Vercel (frontend), AWS Lambda (backend)
