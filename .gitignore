@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 
 .env
+.env.*
+!.env.example
+empathy-journal-lambda/.env
 
 # Lambda deployment artifacts (upload to AWS manually)
 backend/lambda/gptJournalAnalyzer/lambda-deploy.zip
