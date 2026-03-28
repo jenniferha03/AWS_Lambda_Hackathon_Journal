@@ -12,10 +12,8 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 
 ## Architecture
 
-- **Frontend**: `empathy-journal-lambda/`  
-  React + Vite + Tailwind + Firebase Auth/Firestore
-- **Backend**: `backend/lambda/gptJournalAnalyzer/`  
-  AWS Lambda function behind API Gateway for Gemini analysis
+- **Frontend**: `empathy-journal-lambda/` React + Vite + Tailwind + Firebase Auth/Firestore
+- **Backend**: `backend/lambda/gptJournalAnalyzer/` AWS Lambda function behind API Gateway for Gemini analysis
 
 ### Diagram
 
