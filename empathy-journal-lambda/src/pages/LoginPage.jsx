@@ -20,12 +20,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const remembered = getLastEmail();
-    if (remembered) {
+    const isDemo = remembered && remembered.toLowerCase() === demoEmail.toLowerCase();
+    if (remembered && !isDemo) {
       setSavedEmail(remembered);
       setEmail((prev) => prev || remembered);
     }
     setRecentEmails(getRecentEmails());
-  }, []);
+  }, [demoEmail]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -98,7 +99,7 @@ export default function LoginPage() {
               setLoading(true);
               try {
                 const cred = await demoLogin();
-                rememberEmail(cred?.user?.email || demoEmail);
+                if (cred?.user?.email) rememberEmail(cred.user.email);
                 navigate(redirectTo, { replace: true });
               } catch (error) {
                 console.error(error);
