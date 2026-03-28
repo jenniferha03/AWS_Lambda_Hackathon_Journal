@@ -123,11 +123,8 @@ export function AuthProvider({ children }) {
       demoLogin: async () => {
         const demoUrl = resolveDemoLoginUrl();
         if (!demoUrl) throw new Error("Missing demo login endpoint URL.");
-        const res = await fetch(demoUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: "{}",
-        });
+        // No Content-Type / body: avoids CORS preflight so API Gateway without OPTIONS still works.
+        const res = await fetch(demoUrl, { method: "POST", mode: "cors" });
         const rawText = await res.text();
         let body = {};
         try {
