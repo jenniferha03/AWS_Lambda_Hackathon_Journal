@@ -67,8 +67,15 @@ function normalizeOutput(parsed) {
   };
 }
 
-function getRequestPath(event) {
-  return String(event?.rawPath || event?.path || event?.resource || "").toLowerCase();
+function isDemoLoginRequest(event) {
+  const parts = [
+    event?.rawPath,
+    event?.path,
+    event?.resource,
+    event?.requestContext?.path,
+    event?.requestContext?.resourcePath,
+  ];
+  return parts.some((p) => String(p || "").toLowerCase().includes("demo-login"));
 }
 
 function getFirebaseApp() {
@@ -103,11 +110,11 @@ async function handleDemoLogin() {
 }
 
 exports.handler = async (event) => {
-  if (event?.httpMethod === "OPTIONS") {
+  const method = event?.httpMethod || event?.requestContext?.http?.method || "";
+  if (method === "OPTIONS") {
     return { statusCode: 200, headers: corsHeaders, body: "" };
   }
-  const requestPath = getRequestPath(event);
-  if (requestPath.includes("demo-login")) {
+  if (isDemoLoginRequest(event)) {
     return handleDemoLogin();
   }
 
