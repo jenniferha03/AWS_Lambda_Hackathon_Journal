@@ -22,4 +22,6 @@ VITE_FIREBASE_APP_ID="..."
 VITE_FIREBASE_MEASUREMENT_ID="..."
 ```
 
+Optional for **local demo login** when the demo-login HTTP endpoint is unreachable: `VITE_DEMO_EMAIL`, `VITE_DEMO_PASSWORD` (see `.env.example`). Successful **AI Insight** runs auto-save journal rows to Firestore; emotion trend widgets only aggregate entries that include an AI `emotion` field.
+
 For the full project overview (including the serverless backend), see the root `README.md`.

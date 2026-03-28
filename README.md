@@ -19,11 +19,12 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 
 ### Request flow
 
-1. User writes a journal entry and clicks **Analyze with AI**
-2. Frontend sends `POST` request to API Gateway (`VITE_LAMBDA_URL`)
+1. User writes a journal entry and clicks **AI Insight**
+2. Frontend sends `POST` to API Gateway (`VITE_LAMBDA_URL`)
 3. API Gateway triggers Lambda
 4. Lambda calls Gemini and normalizes output schema
-5. Frontend renders insight and can save to Firestore
+5. Frontend shows the insight and **auto-saves** the entry (content + insight) to Firestore so it survives tab changes and reloads (demo data is still cleared on **logout**)
+6. **Save Journal** remains for entries without running AI, or if auto-save fails
 
 ---
 
@@ -42,14 +43,18 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 
 - **Journaling + AI Insight**
   - Analyze entries for emotion, themes, summary, and reflection prompts
+  - Successful analyses are persisted automatically (no extra “save” step for the insight flow)
 - **Analytics**
-  - Emotion trend view and recent emotion chips
+  - Emotion trends and dashboard copy use **AI-analyzed** journal entries only (entries saved without insight are not counted as “Unknown”)
   - Streak visualization for writing consistency
 - **Toolkit**
   - Focus mode (Pomodoro), calm sounds, micro-habits, study todo list
 - **Authentication + Profile**
   - Email/password + Google login
   - User profile + UI theme preferences
+- **Demo account**
+  - Demo login via Lambda custom token or, in local dev, email/password (`VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD`); if the demo-login API fails locally, dev password sign-in is used as a fallback
+  - Demo Firestore content is cleared on logout
 - **Demo Helpers**
   - DEV-only demo seeding tools for presentation
 
@@ -88,6 +93,8 @@ VITE_FIREBASE_MESSAGING_SENDER_ID="..."
 VITE_FIREBASE_APP_ID="..."
 VITE_FIREBASE_MEASUREMENT_ID="..."
 ```
+
+**Local demo login (optional):** If `POST` to the demo-login URL fails (e.g. CORS or wrong URL), set `VITE_DEMO_PASSWORD` (and matching `VITE_DEMO_EMAIL` for your Firebase demo user) so `npm run dev` can sign in without that call. See `empathy-journal-lambda/.env.example`.
 
 ### Backend (Lambda local invoke + smoke test)
 
