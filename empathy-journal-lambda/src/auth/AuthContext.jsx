@@ -99,8 +99,10 @@ export function AuthProvider({ children }) {
     if (explicit) return explicit;
     const lambdaUrl = String(import.meta.env.VITE_LAMBDA_URL || "").trim();
     if (!lambdaUrl) return "";
-    if (lambdaUrl.endsWith("/analyze")) return `${lambdaUrl.slice(0, -"/analyze".length)}/demo-login`;
-    return `${lambdaUrl.replace(/\/$/, "")}/demo-login`;
+    const base = lambdaUrl.replace(/\/$/, "");
+    if (base.endsWith("/analyze")) return `${base.slice(0, -"/analyze".length)}/demo-login`;
+    if (base.endsWith("/gptJournalAnalyzer")) return `${base.slice(0, -"/gptJournalAnalyzer".length)}/demo-login`;
+    return `${base}/demo-login`;
   };
 
   const value = useMemo(
