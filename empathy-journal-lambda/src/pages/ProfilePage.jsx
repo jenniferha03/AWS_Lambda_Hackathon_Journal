@@ -4,13 +4,11 @@ import { updateProfile } from "firebase/auth";
 import PageFade from "../components/PageFade";
 import { useAuth } from "../auth/AuthContext";
 import { db } from "../lib/firebase";
-import { isDemoUserAccount } from "../utils/demoUser";
 import { combineFullName, splitFullName } from "../utils/profileNames";
 
 export default function ProfilePage() {
-  const { user, setUiTheme, refreshUserProfile } = useAuth();
+  const { user, setUiTheme, refreshUserProfile, isDemoUser } = useAuth();
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const isDemoUser = isDemoUserAccount(user);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -243,7 +241,7 @@ export default function ProfilePage() {
 
           <div className="mt-6 flex items-center justify-between">
             <div className="text-xs text-slate-500">
-              Signed in as {user?.email || "N/A"} • UID: {user?.uid || "N/A"}
+              Signed in as {user?.email || (isDemoUser ? demoEmail : "N/A")} • UID: {user?.uid || "N/A"}
             </div>
             <button
               onClick={saveProfile}

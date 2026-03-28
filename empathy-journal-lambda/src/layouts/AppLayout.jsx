@@ -4,7 +4,6 @@ import { addDoc, collection, deleteDoc, doc, getDocs, query, Timestamp, where } 
 import { useAuth } from "../auth/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import { db } from "../lib/firebase";
-import { isDemoUserAccount } from "../utils/demoUser";
 import { greetingFromProfile } from "../utils/profileNames";
 
 const links = [
@@ -15,7 +14,7 @@ const links = [
 ];
 
 export default function AppLayout() {
-  const { user, logout, uiTheme, profileFirstName, profileLastName } = useAuth();
+  const { user, logout, uiTheme, profileFirstName, profileLastName, isDemoUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(false);
@@ -45,8 +44,7 @@ export default function AppLayout() {
   };
 
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const isDemoUser = isDemoUserAccount(user);
-  const canUseDemoTools = import.meta.env.DEV && !!user?.uid;
+  const accountEmailLabel = user?.email || (isDemoUser ? demoEmail : "") || "No email";
 
   const clearDemoContent = async () => {
     if (!user?.uid) return;
@@ -265,7 +263,7 @@ export default function AppLayout() {
               </div>
               <div>
                 <p className="font-medium text-slate-900 dark:text-slate-100">{greetingName}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-300">{user?.email || "No email"}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300">{accountEmailLabel}</p>
               </div>
             </div>
 
@@ -302,7 +300,7 @@ export default function AppLayout() {
               </button>
             </div>
 
-            {canUseDemoTools ? (
+            {isDemoUser ? (
               <div className="mt-6 rounded-xl border border-amber-100 bg-orange-50 p-3 dark:!bg-slate-900/35 dark:!border-slate-700">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-2">Demo tools (dev-only)</p>
                 <div className="space-y-2">

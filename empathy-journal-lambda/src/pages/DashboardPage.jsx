@@ -15,7 +15,6 @@ import {
 import { db } from "../lib/firebase";
 import PageFade from "../components/PageFade";
 import { useAuth } from "../auth/AuthContext";
-import { isDemoUserAccount } from "../utils/demoUser";
 import { greetingFromProfile } from "../utils/profileNames";
 
 function todayKey() {
@@ -140,13 +139,12 @@ function MiniCalendar({ markedDays }) {
 }
 
 export default function DashboardPage() {
-  const { user, profileFirstName } = useAuth();
+  const { user, profileFirstName, isDemoUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [journals, setJournals] = useState([]);
   const [text, setText] = useState("");
   const [imageData, setImageData] = useState("");
   const [saving, setSaving] = useState(false);
-  const isDemoUser = isDemoUserAccount(user);
   const userLabel = useMemo(
     () => greetingFromProfile(profileFirstName, user?.displayName, user?.email),
     [profileFirstName, user?.displayName, user?.email],

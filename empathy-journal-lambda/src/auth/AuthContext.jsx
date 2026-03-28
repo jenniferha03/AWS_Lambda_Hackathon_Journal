@@ -80,7 +80,32 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const isDemoUser = isDemoUserAccount(user);
+  const [isDemoUser, setIsDemoUser] = useState(false);
+  useEffect(() => {
+    if (!user) {
+      setIsDemoUser(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        await user.getIdToken(true);
+        const r = await user.getIdTokenResult();
+        if (cancelled) return;
+        if (r.claims?.demo === true) {
+          setIsDemoUser(true);
+          return;
+        }
+      } catch (e) {
+        console.error("Demo token claim check:", e);
+      }
+      if (cancelled) return;
+      setIsDemoUser(isDemoUserAccount(user));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const clearDemoContent = async (uid) => {
     if (!uid) return;
@@ -113,6 +138,7 @@ export function AuthProvider({ children }) {
       setUiTheme,
       profileFirstName,
       profileLastName,
+      isDemoUser,
       refreshUserProfile,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
       signup: async (name, email, password) => {
@@ -167,7 +193,7 @@ export function AuthProvider({ children }) {
       },
       getIdToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : ""),
     }),
-    [user, loading, uiTheme, profileFirstName, profileLastName, refreshUserProfile, isDemoUser],
+    [user, loading, uiTheme, profileFirstName, profileLastName, isDemoUser, refreshUserProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
