@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import JournalList from "../components/JournalList";
@@ -20,13 +20,29 @@ export default function JournalPage() {
   const [insight, setInsight] = useState(null);
   const [analyzedJournal, setAnalyzedJournal] = useState("");
   const [loading, setLoading] = useState(false);
+  const insightAlreadyPersisted = useRef(false);
   const trimmedJournal = journal.trim();
   const isJournalEmpty = trimmedJournal.length === 0;
+
+  useEffect(() => {
+    if (analyzedJournal && trimmedJournal !== analyzedJournal) {
+      insightAlreadyPersisted.current = false;
+    }
+  }, [trimmedJournal, analyzedJournal]);
 
   const saveJournal = async () => {
     if (isJournalEmpty) return;
     if (!user?.uid) {
       alert("Please log in again before saving.");
+      return;
+    }
+    if (
+      insightAlreadyPersisted.current &&
+      analyzedJournal === trimmedJournal &&
+      insight &&
+      !insight.error
+    ) {
+      alert("This entry is already saved with this insight.");
       return;
     }
     try {
@@ -42,6 +58,7 @@ export default function JournalPage() {
       setJournal("");
       setInsight(null);
       setAnalyzedJournal("");
+      insightAlreadyPersisted.current = false;
     } catch (err) {
       console.error(err);
       alert(`Error saving journal: ${err?.code || "unknown"}${err?.message ? ` - ${err.message}` : ""}`);
@@ -50,8 +67,10 @@ export default function JournalPage() {
 
   const analyzeJournal = async () => {
     if (isJournalEmpty) return;
+    const contentSnapshot = trimmedJournal;
     setLoading(true);
     setInsight(null);
+    insightAlreadyPersisted.current = false;
     try {
       const token = await getIdToken();
       const res = await fetch(import.meta.env.VITE_LAMBDA_URL, {
@@ -60,7 +79,7 @@ export default function JournalPage() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ journal: trimmedJournal }),
+        body: JSON.stringify({ journal: contentSnapshot }),
       });
 
       const data = await res.json();
@@ -77,7 +96,20 @@ export default function JournalPage() {
         setAnalyzedJournal("");
       } else {
         setInsight(data);
-        setAnalyzedJournal(trimmedJournal);
+        setAnalyzedJournal(contentSnapshot);
+        if (user?.uid) {
+          try {
+            await addDoc(collection(db, "journals"), {
+              userId: user.uid,
+              content: contentSnapshot,
+              insight: data,
+              createdAt: Timestamp.now(),
+            });
+            insightAlreadyPersisted.current = true;
+          } catch (persistErr) {
+            console.error("Auto-save journal after insight failed:", persistErr);
+          }
+        }
       }
     } catch (err) {
       console.error(err);

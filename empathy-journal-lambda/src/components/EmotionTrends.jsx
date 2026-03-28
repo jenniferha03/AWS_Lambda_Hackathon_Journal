@@ -3,10 +3,12 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../auth/AuthContext";
 
-function normalizeEmotion(value) {
-  if (typeof value !== "string") return "Unknown";
-  const trimmed = value.trim();
-  return trimmed ? trimmed : "Unknown";
+/** Emotion from AI journal insight only; omit entries without analysis. */
+function emotionFromAiInsight(data) {
+  const raw = data?.insight?.emotion;
+  if (typeof raw !== "string") return null;
+  const t = raw.trim();
+  return t ? t : null;
 }
 
 function emotionColorClass(emotion) {
@@ -22,12 +24,14 @@ function emotionColorClass(emotion) {
 export default function EmotionTrends() {
   const { user } = useAuth();
   const [entries, setEntries] = useState([]);
+  const [totalJournalCount, setTotalJournalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user?.uid) {
       setEntries([]);
+      setTotalJournalCount(0);
       setLoading(false);
       return;
     }
@@ -38,21 +42,32 @@ export default function EmotionTrends() {
     const unsub = onSnapshot(
       q,
       (snapshot) => {
-        const data = snapshot.docs
+        const sorted = snapshot.docs
           .map((doc) => {
             const d = doc.data();
             return {
               id: doc.id,
               createdAt: d.createdAt || null,
-              emotion: normalizeEmotion(d?.insight?.emotion),
+              raw: d,
             };
           })
           .sort((a, b) => {
             const at = a.createdAt?.toMillis?.() || 0;
             const bt = b.createdAt?.toMillis?.() || 0;
             return bt - at;
+          });
+
+        setTotalJournalCount(sorted.length);
+
+        const data = sorted
+          .map((row) => {
+            const emotion = emotionFromAiInsight(row.raw);
+            if (!emotion) return null;
+            return { id: row.id, createdAt: row.createdAt, emotion };
           })
+          .filter(Boolean)
           .slice(0, 7);
+
         setEntries(data);
         setLoading(false);
       },
@@ -81,7 +96,7 @@ export default function EmotionTrends() {
     <section className="bg-white/80 dark:bg-slate-900/40 p-6 md:p-8 rounded-3xl shadow-sm border border-amber-100 dark:border-slate-700 flex flex-col space-y-6">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="text-2xl font-bold text-amber-700 dark:text-[#AAF0D1]">Emotion Trends</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">Last 7 journal entries</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Last 7 AI-analyzed entries</p>
       </div>
 
       {loading ? (
@@ -94,7 +109,9 @@ export default function EmotionTrends() {
         </p>
       ) : entries.length === 0 ? (
         <p className="text-slate-700 dark:text-slate-200 bg-amber-50 dark:bg-slate-900/35 p-4 rounded-xl border border-amber-100 dark:border-slate-700">
-          No journals yet—write a reflection and save it to see trends.
+          {totalJournalCount === 0
+            ? "No journals yet—write a reflection and use AI Insight to see trends here."
+            : "No AI insights in your saved journals yet. Open Journal and run AI Insight so emotions can appear here—entries saved without analysis are not counted."}
         </p>
       ) : (
         <div className="space-y-4">

@@ -41,6 +41,13 @@ function formatDateKey(date) {
   return startOfDay(date).toISOString().slice(0, 10);
 }
 
+function emotionFromJournalInsight(j) {
+  const raw = j?.insight?.emotion;
+  if (typeof raw !== "string") return null;
+  const t = raw.trim();
+  return t ? t : null;
+}
+
 function MiniCalendar({ markedDays }) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -485,13 +492,18 @@ export default function DashboardPage() {
     const now = Date.now();
     const weekMs = 7 * 24 * 60 * 60 * 1000;
     const recent = journals.filter((j) => j.createdAt?.toDate && now - j.createdAt.toDate().getTime() <= weekMs);
+    const withAiEmotion = recent.map((j) => emotionFromJournalInsight(j)).filter(Boolean);
+    if (withAiEmotion.length === 0) {
+      return recent.length > 0
+        ? "No AI insight emotions this week yet—run AI Insight on a journal entry to see a summary here."
+        : "No journal activity this week yet.";
+    }
     const byEmotion = new Map();
-    for (const j of recent) {
-      const e = j?.insight?.emotion || "Unknown";
+    for (const e of withAiEmotion) {
       byEmotion.set(e, (byEmotion.get(e) || 0) + 1);
     }
     const top = Array.from(byEmotion.entries()).sort((a, b) => b[1] - a[1])[0];
-    return top ? `${top[0]} appeared ${top[1]} time(s) this week.` : "No emotion data this week yet.";
+    return `${top[0]} appeared ${top[1]} time(s) this week (from AI insights).`;
   }, [journals]);
 
   const handleImage = (e) => {

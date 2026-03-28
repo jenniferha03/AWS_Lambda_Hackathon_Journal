@@ -150,46 +150,54 @@ export function AuthProvider({ children }) {
       demoLogin: async () => {
         const demoUrl = resolveDemoLoginUrl();
         const demoEm = String(import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app").trim();
+        const devDemoPw = import.meta.env.DEV ? String(import.meta.env.VITE_DEMO_PASSWORD || "").trim() : "";
+
+        const signInDevDemoWithPassword = () => signInWithEmailAndPassword(auth, demoEm, devDemoPw);
 
         if (demoUrl) {
-          // No Content-Type / body: avoids CORS preflight so API Gateway without OPTIONS still works.
-          const res = await fetch(demoUrl, { method: "POST", mode: "cors" });
-          const rawText = await res.text();
-          let body = {};
           try {
-            body = rawText ? JSON.parse(rawText) : {};
-          } catch {
-            throw new Error("Demo server returned invalid JSON.");
-          }
-          let customToken = body?.customToken;
-          if (!customToken && typeof body?.body === "string") {
+            // No Content-Type / body: avoids CORS preflight so API Gateway without OPTIONS still works.
+            const res = await fetch(demoUrl, { method: "POST", mode: "cors" });
+            const rawText = await res.text();
+            let body = {};
             try {
-              const inner = JSON.parse(body.body);
-              customToken = inner?.customToken;
-              if (!customToken && inner?.error) throw new Error(inner.error);
-            } catch (e) {
-              if (e?.message && e.message !== "[object Object]") throw e;
+              body = rawText ? JSON.parse(rawText) : {};
+            } catch {
+              throw new Error("Demo server returned invalid JSON.");
             }
-          }
-          if (!customToken) {
-            let msg = body?.error;
-            if (!msg && typeof body?.body === "string") {
+            let customToken = body?.customToken;
+            if (!customToken && typeof body?.body === "string") {
               try {
-                msg = JSON.parse(body.body)?.error;
-              } catch {
-                /* ignore */
+                const inner = JSON.parse(body.body);
+                customToken = inner?.customToken;
+                if (!customToken && inner?.error) throw new Error(inner.error);
+              } catch (e) {
+                if (e?.message && e.message !== "[object Object]") throw e;
               }
             }
-            throw new Error(msg || `Demo login failed (HTTP ${res.status}).`);
+            if (!customToken) {
+              let msg = body?.error;
+              if (!msg && typeof body?.body === "string") {
+                try {
+                  msg = JSON.parse(body.body)?.error;
+                } catch {
+                  /* ignore */
+                }
+              }
+              throw new Error(msg || `Demo login failed (HTTP ${res.status}).`);
+            }
+            return signInWithCustomToken(auth, customToken);
+          } catch (e) {
+            if (import.meta.env.DEV && devDemoPw) {
+              console.warn("Demo API unreachable or error; using VITE_DEMO_PASSWORD for local dev:", e?.message || e);
+              return signInDevDemoWithPassword();
+            }
+            throw e instanceof Error ? e : new Error(String(e));
           }
-          return signInWithCustomToken(auth, customToken);
         }
 
-        if (import.meta.env.DEV) {
-          const demoPw = String(import.meta.env.VITE_DEMO_PASSWORD || "").trim();
-          if (demoPw) {
-            return signInWithEmailAndPassword(auth, demoEm, demoPw);
-          }
+        if (import.meta.env.DEV && devDemoPw) {
+          return signInDevDemoWithPassword();
         }
 
         throw new Error(
