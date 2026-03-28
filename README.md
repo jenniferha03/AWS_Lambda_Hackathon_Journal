@@ -17,7 +17,7 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 - **Backend**: `backend/lambda/gptJournalAnalyzer/`  
   AWS Lambda function behind API Gateway for Gemini analysis
 
-### Diagram (high level)
+### Diagram
 
 GitHub renders this Mermaid diagram in the README preview:
 
