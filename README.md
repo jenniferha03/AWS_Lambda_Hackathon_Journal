@@ -17,6 +17,36 @@ Empathy Journal is a journaling web app that helps users reflect, understand emo
 - **Backend**: `backend/lambda/gptJournalAnalyzer/`  
   AWS Lambda function behind API Gateway for Gemini analysis
 
+### Diagram (high level)
+
+GitHub renders this Mermaid diagram in the README preview:
+
+```mermaid
+flowchart LR
+  subgraph client["Client — React SPA (Vercel)"]
+    UI[Empathy Journal]
+  end
+  subgraph firebase["Google Firebase"]
+    Auth[Firebase Auth]
+    DB[(Firestore)]
+  end
+  subgraph aws["AWS"]
+    GW[API Gateway]
+    L[Lambda · gptJournalAnalyzer]
+  end
+  GEM[Gemini API]
+
+  UI --> Auth
+  UI --> DB
+  UI -->|POST analyze| GW --> L --> GEM
+  L -->|JSON insight| GW --> UI
+  UI -->|read / write journals| DB
+  UI -.->|optional demo-login| GW
+  L -.->|Firebase Admin · custom token| Auth
+```
+
+Solid lines: main journaling + AI path. Dotted: demo sign-in via Lambda (custom token), when used.
+
 ### Request flow
 
 1. User writes a journal entry and clicks **AI Insight**
