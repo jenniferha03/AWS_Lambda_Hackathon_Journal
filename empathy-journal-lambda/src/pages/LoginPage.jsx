@@ -15,7 +15,9 @@ export default function LoginPage() {
   const location = useLocation();
   const redirectTo = location.state?.from?.pathname || "/app/dashboard";
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const canUseDemoLogin = Boolean(import.meta.env.VITE_DEMO_LOGIN_URL || import.meta.env.VITE_LAMBDA_URL);
+  const canUseDemoLogin =
+    Boolean(import.meta.env.VITE_DEMO_LOGIN_URL || import.meta.env.VITE_LAMBDA_URL) ||
+    (import.meta.env.DEV && Boolean(String(import.meta.env.VITE_DEMO_PASSWORD || "").trim()));
 
   useEffect(() => {
     setRecentEmails(getRecentEmails());

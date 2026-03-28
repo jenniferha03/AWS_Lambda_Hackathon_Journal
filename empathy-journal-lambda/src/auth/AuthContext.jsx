@@ -149,38 +149,52 @@ export function AuthProvider({ children }) {
       },
       demoLogin: async () => {
         const demoUrl = resolveDemoLoginUrl();
-        if (!demoUrl) throw new Error("Missing demo login endpoint URL.");
-        // No Content-Type / body: avoids CORS preflight so API Gateway without OPTIONS still works.
-        const res = await fetch(demoUrl, { method: "POST", mode: "cors" });
-        const rawText = await res.text();
-        let body = {};
-        try {
-          body = rawText ? JSON.parse(rawText) : {};
-        } catch {
-          throw new Error("Demo server returned invalid JSON.");
-        }
-        let customToken = body?.customToken;
-        if (!customToken && typeof body?.body === "string") {
+        const demoEm = String(import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app").trim();
+
+        if (demoUrl) {
+          // No Content-Type / body: avoids CORS preflight so API Gateway without OPTIONS still works.
+          const res = await fetch(demoUrl, { method: "POST", mode: "cors" });
+          const rawText = await res.text();
+          let body = {};
           try {
-            const inner = JSON.parse(body.body);
-            customToken = inner?.customToken;
-            if (!customToken && inner?.error) throw new Error(inner.error);
-          } catch (e) {
-            if (e?.message && e.message !== "[object Object]") throw e;
+            body = rawText ? JSON.parse(rawText) : {};
+          } catch {
+            throw new Error("Demo server returned invalid JSON.");
           }
-        }
-        if (!customToken) {
-          let msg = body?.error;
-          if (!msg && typeof body?.body === "string") {
+          let customToken = body?.customToken;
+          if (!customToken && typeof body?.body === "string") {
             try {
-              msg = JSON.parse(body.body)?.error;
-            } catch {
-              /* ignore */
+              const inner = JSON.parse(body.body);
+              customToken = inner?.customToken;
+              if (!customToken && inner?.error) throw new Error(inner.error);
+            } catch (e) {
+              if (e?.message && e.message !== "[object Object]") throw e;
             }
           }
-          throw new Error(msg || `Demo login failed (HTTP ${res.status}).`);
+          if (!customToken) {
+            let msg = body?.error;
+            if (!msg && typeof body?.body === "string") {
+              try {
+                msg = JSON.parse(body.body)?.error;
+              } catch {
+                /* ignore */
+              }
+            }
+            throw new Error(msg || `Demo login failed (HTTP ${res.status}).`);
+          }
+          return signInWithCustomToken(auth, customToken);
         }
-        return signInWithCustomToken(auth, customToken);
+
+        if (import.meta.env.DEV) {
+          const demoPw = String(import.meta.env.VITE_DEMO_PASSWORD || "").trim();
+          if (demoPw) {
+            return signInWithEmailAndPassword(auth, demoEm, demoPw);
+          }
+        }
+
+        throw new Error(
+          "Demo login: set VITE_LAMBDA_URL (or VITE_DEMO_LOGIN_URL) for API token login, or in local dev add VITE_DEMO_PASSWORD to .env.",
+        );
       },
       loginWithGoogle: async () => {
         try {
