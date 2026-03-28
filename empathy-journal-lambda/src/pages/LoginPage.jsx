@@ -91,7 +91,7 @@ export default function LoginPage() {
                 navigate(redirectTo, { replace: true });
               } catch (error) {
                 console.error(error);
-                alert("Demo login failed.");
+                alert(error?.message || "Demo login failed.");
               } finally {
                 setLoading(false);
               }

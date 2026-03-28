@@ -126,12 +126,37 @@ export function AuthProvider({ children }) {
         const res = await fetch(demoUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          body: "{}",
         });
-        const body = await res.json().catch(() => ({}));
-        if (!res.ok || !body?.customToken) {
-          throw new Error(body?.error || "Demo login failed.");
+        const rawText = await res.text();
+        let body = {};
+        try {
+          body = rawText ? JSON.parse(rawText) : {};
+        } catch {
+          throw new Error("Demo server returned invalid JSON.");
         }
-        return signInWithCustomToken(auth, body.customToken);
+        let customToken = body?.customToken;
+        if (!customToken && typeof body?.body === "string") {
+          try {
+            const inner = JSON.parse(body.body);
+            customToken = inner?.customToken;
+            if (!customToken && inner?.error) throw new Error(inner.error);
+          } catch (e) {
+            if (e?.message && e.message !== "[object Object]") throw e;
+          }
+        }
+        if (!customToken) {
+          let msg = body?.error;
+          if (!msg && typeof body?.body === "string") {
+            try {
+              msg = JSON.parse(body.body)?.error;
+            } catch {
+              /* ignore */
+            }
+          }
+          throw new Error(msg || `Demo login failed (HTTP ${res.status}).`);
+        }
+        return signInWithCustomToken(auth, customToken);
       },
       loginWithGoogle: () => signInWithPopup(auth, googleProvider),
       logout: async () => {
