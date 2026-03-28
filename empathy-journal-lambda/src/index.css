@@ -61,6 +61,22 @@ html.accent-focus {
   --ui-accent-border: rgba(148, 163, 184, 0.35);
 }
 
+html {
+  /* Fills overscroll / letterboxing so screenshots and mobile bounce aren’t raw white */
+  background-color: #fff8f1;
+}
+
+html.dark {
+  /*
+   * Navbar: `bg-slate-900/80|85` over `slate-950` + backdrop-blur reads darker than flat slate-900.
+   * ~90% slate-900 + slate-950 matches overscroll to that bar; hex fallback for older engines.
+   */
+  --dark-chrome-bg: #0e1528;
+  color-scheme: dark;
+  background-color: var(--dark-chrome-bg);
+  background-color: color-mix(in srgb, rgb(15 23 42) 90%, rgb(2 6 23));
+}
+
 html,
 body,
 #root {
@@ -68,12 +84,18 @@ body,
   min-height: 100%;
 }
 
+#root {
+  min-height: 100dvh;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
   color: #1f2937;
-  background: radial-gradient(circle at top right, #ffe7d0 0%, #fff8f1 42%, #f8fffb 100%);
+  background-color: #fff8f1;
+  background-image: radial-gradient(circle at top right, #ffe7d0 0%, #fff8f1 42%, #f8fffb 100%);
 }
 
 * {
@@ -94,7 +116,9 @@ h4 {
 }
 
 .dark body {
-  background: radial-gradient(circle at top right, #2f1f16 0%, #16191f 42%, #13211d 100%);
+  background-color: var(--dark-chrome-bg);
+  background-color: color-mix(in srgb, rgb(15 23 42) 90%, rgb(2 6 23));
+  background-image: radial-gradient(circle at top right, #2f1f16 0%, #16191f 42%, #13211d 100%);
   color: #e2e8f0;
 }
 
