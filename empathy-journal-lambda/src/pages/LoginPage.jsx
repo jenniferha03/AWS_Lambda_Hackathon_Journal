@@ -3,13 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import PageFade from "../components/PageFade";
 import PasswordInput from "../components/PasswordInput";
-import { getLastEmail, getRecentEmails, rememberEmail, removeRememberedEmail } from "../utils/recentEmails";
+import { getRecentEmails, rememberEmail, removeRememberedEmail } from "../utils/recentEmails";
 
 export default function LoginPage() {
   const { login, loginWithGoogle, demoLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [savedEmail, setSavedEmail] = useState("");
   const [recentEmails, setRecentEmails] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,14 +18,8 @@ export default function LoginPage() {
   const canUseDemoLogin = Boolean(import.meta.env.VITE_DEMO_LOGIN_URL || import.meta.env.VITE_LAMBDA_URL);
 
   useEffect(() => {
-    const remembered = getLastEmail();
-    const isDemo = remembered && remembered.toLowerCase() === demoEmail.toLowerCase();
-    if (remembered && !isDemo) {
-      setSavedEmail(remembered);
-      setEmail((prev) => prev || remembered);
-    }
     setRecentEmails(getRecentEmails());
-  }, [demoEmail]);
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -120,12 +113,6 @@ export default function LoginPage() {
         >
           Continue with Google
         </button>
-        {savedEmail ? (
-          <div className="mt-3 text-xs bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 text-slate-700 dark:bg-slate-900/35 dark:border-slate-700 dark:text-slate-200">
-            Remembered email:{" "}
-            <span className="font-medium text-slate-900 dark:text-slate-100">{savedEmail}</span>
-          </div>
-        ) : null}
         {recentEmails.length > 0 ? (
           <div className="mt-3 rounded-lg border border-amber-100 dark:border-slate-700 p-3 bg-white/60 dark:bg-slate-900/25">
             <p className="text-xs text-slate-700 dark:text-slate-300 mb-2">Recent accounts</p>
@@ -144,8 +131,7 @@ export default function LoginPage() {
                     onClick={() => {
                       const next = removeRememberedEmail(item);
                       setRecentEmails(next);
-                      if (savedEmail === item) setSavedEmail(next[0] || "");
-                      if (email === item) setEmail(next[0] || "");
+                      if (email === item) setEmail("");
                     }}
                     className="text-xs px-2 py-0.5 rounded bg-amber-50 border border-amber-100 hover:bg-amber-100 transition dark:!bg-slate-900/35 dark:!border-slate-700 dark:hover:!bg-slate-900/55 dark:text-slate-200"
                   >
