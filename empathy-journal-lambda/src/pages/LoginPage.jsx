@@ -43,13 +43,24 @@ export default function LoginPage() {
   };
 
   const loginGoogle = async () => {
+    setLoading(true);
     try {
       const cred = await loginWithGoogle();
-      if (cred?.user?.email) rememberEmail(cred.user.email);
-      navigate("/app/dashboard", { replace: true });
+      if (cred?.user) {
+        if (cred.user.email) rememberEmail(cred.user.email);
+        navigate(redirectTo, { replace: true });
+      }
+      // signInWithRedirect: cred is null; GoogleAuthRedirectResolve navigates after return.
     } catch (error) {
       console.error(error);
-      alert("Google login failed.");
+      const code = error?.code;
+      const hint =
+        code === "auth/unauthorized-domain"
+          ? " Add this site under Firebase Console → Authentication → Settings → Authorized domains."
+          : "";
+      alert(`${code || error?.message || "Google login failed."}${hint}`);
+    } finally {
+      setLoading(false);
     }
   };
 

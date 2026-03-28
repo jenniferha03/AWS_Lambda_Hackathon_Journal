@@ -14,6 +14,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
+import GoogleAuthRedirectResolve from "./components/GoogleAuthRedirectResolve";
 import { ThemeProvider } from "./theme/ThemeContext";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <GoogleAuthRedirectResolve />
           <Routes>
             <Route path="/" element={<PublicLayout />}>
               <Route index element={<LandingPage />} />

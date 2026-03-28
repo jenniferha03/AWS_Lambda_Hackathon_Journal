@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithCustomToken,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
 } from "firebase/auth";
@@ -181,7 +182,17 @@ export function AuthProvider({ children }) {
         }
         return signInWithCustomToken(auth, customToken);
       },
-      loginWithGoogle: () => signInWithPopup(auth, googleProvider),
+      loginWithGoogle: async () => {
+        try {
+          return await signInWithPopup(auth, googleProvider);
+        } catch (e) {
+          if (e?.code === "auth/popup-blocked" || e?.code === "auth/cancelled-popup-request") {
+            await signInWithRedirect(auth, googleProvider);
+            return null;
+          }
+          throw e;
+        }
+      },
       logout: async () => {
         try {
           if (isDemoUser && user?.uid) await clearDemoContent(user.uid);
