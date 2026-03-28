@@ -13,13 +13,17 @@ export default function PublicLayout() {
       }`}
     >
       <div
-        className={`pointer-events-none absolute -top-20 -right-10 h-64 w-64 rounded-full blur-3xl animate-pulse ${
-          isDark ? "bg-amber-700/20" : "bg-orange-200/35"
+        className={`pointer-events-none rounded-full blur-3xl animate-pulse h-72 w-72 ${
+          isDark
+            ? "absolute -top-20 -left-10 bg-amber-300/22"
+            : "absolute -top-20 -right-10 bg-orange-200/35"
         }`}
       />
       <div
-        className={`pointer-events-none absolute top-40 -left-12 h-52 w-52 rounded-full blur-3xl animate-pulse ${
-          isDark ? "bg-emerald-700/20" : "bg-emerald-200/35"
+        className={`pointer-events-none rounded-full blur-3xl animate-pulse ${
+          isDark
+            ? "absolute top-36 -right-16 h-72 w-72 bg-[#AAF0D1]/30"
+            : "absolute top-40 -left-12 h-60 w-60 bg-emerald-200/35"
         }`}
       />
       <header

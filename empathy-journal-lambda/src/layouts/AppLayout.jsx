@@ -178,13 +178,15 @@ export default function AppLayout() {
   return (
     <div className={`min-h-screen relative overflow-hidden ${isDark ? "bg-slate-950 text-slate-100" : "text-slate-800"}`}>
       <div
-        className={`pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full blur-3xl animate-pulse ${
-          isDark ? "bg-amber-700/20" : "bg-[color:var(--ui-accent-soft)]/70"
+        className={`pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full blur-3xl animate-pulse ${
+          isDark ? "bg-amber-300/22" : "bg-[color:var(--ui-accent-soft)]/70"
         }`}
       />
       <div
-        className={`pointer-events-none absolute top-28 right-12 h-48 w-48 rounded-full blur-3xl animate-pulse ${
-          isDark ? "bg-emerald-700/20" : "bg-[color:var(--ui-accent)]/35"
+        className={`pointer-events-none absolute rounded-full blur-3xl animate-pulse ${
+          isDark
+            ? "top-16 -right-16 h-[22rem] w-[22rem] bg-emerald-500/50"
+            : "top-28 right-12 h-56 w-56 bg-[color:var(--ui-accent)]/35"
         }`}
       />
       <header className={`h-16 border-b backdrop-blur sticky top-0 z-10 ${isDark ? "border-slate-700 bg-slate-900/85" : "border-amber-100 bg-white/80"}`}>

@@ -7,6 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#fff8f1" />
     <title>Empathy Journal</title>
+    <!-- Apply saved theme before React paint — avoids amber logo flash when dark mode is stored -->
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("empathy_theme_mode") === "dark") {
+            document.documentElement.classList.add("dark");
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute("content", "#0e1528");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
