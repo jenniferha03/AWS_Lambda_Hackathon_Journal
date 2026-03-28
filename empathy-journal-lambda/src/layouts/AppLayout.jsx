@@ -4,6 +4,7 @@ import { addDoc, collection, deleteDoc, doc, getDocs, query, Timestamp, where } 
 import { useAuth } from "../auth/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import { db } from "../lib/firebase";
+import { isDemoUserAccount } from "../utils/demoUser";
 import { greetingFromProfile } from "../utils/profileNames";
 
 const links = [
@@ -44,7 +45,7 @@ export default function AppLayout() {
   };
 
   const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
+  const isDemoUser = isDemoUserAccount(user);
   const canUseDemoTools = import.meta.env.DEV && !!user?.uid;
 
   const clearDemoContent = async () => {

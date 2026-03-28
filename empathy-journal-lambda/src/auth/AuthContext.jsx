@@ -11,6 +11,7 @@ import {
 import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { auth, googleProvider } from "../lib/firebase";
 import { db } from "../lib/firebase";
+import { isDemoUserAccount } from "../utils/demoUser";
 import { splitFullName } from "../utils/profileNames";
 
 const AuthContext = createContext(null);
@@ -79,8 +80,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
+  const isDemoUser = isDemoUserAccount(user);
 
   const clearDemoContent = async (uid) => {
     if (!uid) return;

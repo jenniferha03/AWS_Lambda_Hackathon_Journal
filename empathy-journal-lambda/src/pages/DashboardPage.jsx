@@ -15,6 +15,7 @@ import {
 import { db } from "../lib/firebase";
 import PageFade from "../components/PageFade";
 import { useAuth } from "../auth/AuthContext";
+import { isDemoUserAccount } from "../utils/demoUser";
 import { greetingFromProfile } from "../utils/profileNames";
 
 function todayKey() {
@@ -145,8 +146,7 @@ export default function DashboardPage() {
   const [text, setText] = useState("");
   const [imageData, setImageData] = useState("");
   const [saving, setSaving] = useState(false);
-  const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@empathyjournal.app";
-  const isDemoUser = import.meta.env.DEV && (user?.email || "").toLowerCase() === demoEmail.toLowerCase();
+  const isDemoUser = isDemoUserAccount(user);
   const userLabel = useMemo(
     () => greetingFromProfile(profileFirstName, user?.displayName, user?.email),
     [profileFirstName, user?.displayName, user?.email],

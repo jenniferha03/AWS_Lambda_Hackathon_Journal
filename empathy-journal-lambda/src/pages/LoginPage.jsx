@@ -87,7 +87,7 @@ export default function LoginPage() {
               setLoading(true);
               try {
                 const cred = await demoLogin();
-                if (cred?.user?.email) rememberEmail(cred.user.email);
+                rememberEmail(cred?.user?.email || demoEmail);
                 navigate(redirectTo, { replace: true });
               } catch (error) {
                 console.error(error);
