@@ -6,7 +6,8 @@
   "scripts": {
     "check": "node -c index.js",
     "invoke:local": "node invoke-local.js",
-    "test:smoke": "node smoke-test.js"
+    "test:smoke": "node smoke-test.js",
+    "test:suggested-actions": "node suggested-actions-test.js"
   },
   "dependencies": {
     "@google/generative-ai": "latest",
