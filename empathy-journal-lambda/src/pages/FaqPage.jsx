@@ -14,7 +14,6 @@ export default function FaqPage() {
         <h1 className="text-4xl font-bold text-amber-700 dark:text-[#AAF0D1] mb-8">FAQ</h1>
         <div className="space-y-6">
           {faqs.map(([q, a]) => (
-            {/* Keep FAQ boxes visually tall even when collapsed */}
             <details
               key={q}
               className="w-full bg-white border border-slate-200 rounded-2xl px-8 py-6 min-h-[140px]"
