@@ -16,9 +16,9 @@ export default function FaqPage() {
           {faqs.map(([q, a]) => (
             <details
               key={q}
-              className="w-full bg-white border border-slate-200 rounded-xl p-4"
+              className="block w-full bg-white border border-slate-200 rounded-xl p-4"
             >
-              <summary className="block w-full cursor-pointer font-semibold text-slate-800">
+              <summary className="block w-full cursor-pointer list-none font-semibold text-slate-800">
                 {q}
               </summary>
               <p className="mt-2 w-full text-slate-600">{a}</p>
