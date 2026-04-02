@@ -12,13 +12,13 @@ export default function FaqPage() {
     <PageFade>
       <div className="w-full max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-amber-700 dark:text-[#AAF0D1] mb-8">FAQ</h1>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {faqs.map(([q, a]) => (
-            <details key={q} className="w-full bg-white border border-slate-200 rounded-xl px-5 py-4">
-              <summary className="cursor-pointer w-full font-semibold text-slate-800 list-none text-lg">
+            <details key={q} className="w-full bg-white border border-slate-200 rounded-2xl px-8 py-6">
+              <summary className="cursor-pointer w-full font-semibold text-slate-800 list-none text-xl">
                 {q}
               </summary>
-              <p className="mt-2 text-slate-600 leading-relaxed text-base">{a}</p>
+              <p className="mt-3 text-slate-600 leading-relaxed text-lg">{a}</p>
             </details>
           ))}
         </div>
