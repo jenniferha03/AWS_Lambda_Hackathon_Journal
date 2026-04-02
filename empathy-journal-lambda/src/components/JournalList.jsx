@@ -106,6 +106,20 @@ export default function JournalList() {
                         Summary: {entry.insight.summary}
                       </p>
                     )}
+                    {entry.insight.suggested_actions &&
+                      Array.isArray(entry.insight.suggested_actions) &&
+                      entry.insight.suggested_actions.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm font-semibold text-amber-700 dark:text-[#AAF0D1] mb-2">
+                            Suggested Actions:
+                          </p>
+                          <ul className="list-disc list-inside text-sm text-slate-700 dark:text-slate-200 space-y-1">
+                            {entry.insight.suggested_actions.map((act, aIdx) => (
+                              <li key={aIdx}>{act}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     {entry.insight.reflection_prompts && Array.isArray(entry.insight.reflection_prompts) && (
                       <div className="mt-3">
                         <p className="text-sm font-semibold text-amber-700 dark:text-[#AAF0D1] mb-2">

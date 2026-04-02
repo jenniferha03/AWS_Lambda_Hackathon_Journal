@@ -175,6 +175,17 @@ export default function JournalPage() {
                 <Section title="Summary">
                   <p className="text-slate-700 dark:text-slate-200 leading-relaxed">{insight.summary}</p>
                 </Section>
+                <Section title="Suggested Actions">
+                  {Array.isArray(insight.suggested_actions) && insight.suggested_actions.length > 0 ? (
+                    <ul className="list-disc list-inside text-slate-700 dark:text-slate-200 space-y-2">
+                      {insight.suggested_actions.map((act, i) => (
+                        <li key={i}>{act}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-slate-600 dark:text-slate-300">No actions suggested.</p>
+                  )}
+                </Section>
               </div>
             ) : insight?.error ? (
               <p className="text-red-700 bg-red-100 p-4 rounded-xl dark:!bg-rose-950/30 dark:!text-rose-200 border border-red-200/60 dark:border-rose-900/40">

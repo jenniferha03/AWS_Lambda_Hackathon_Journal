@@ -59,11 +59,29 @@ function normalizePrompts(value) {
   return out;
 }
 
+function normalizeActions(value) {
+  const raw = Array.isArray(value) ? value : [];
+  const cleaned = raw
+    .filter((x) => typeof x === "string")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  // Keep 1-3 actions for UI; never allow undefined.
+  const out = cleaned.slice(0, 3);
+  if (out.length === 0) {
+    return [
+      "Take one small step for your body in the next 5 minutes: breathe slowly and write 2 sentences about what you need.",
+    ];
+  }
+  return out;
+}
+
 function normalizeOutput(parsed) {
   return {
     emotion: typeof parsed?.emotion === "string" ? parsed.emotion : "Unknown",
     themes: Array.isArray(parsed?.themes) ? parsed.themes : [],
     reflection_prompts: normalizePrompts(parsed?.reflection_prompts),
+    suggested_actions: normalizeActions(parsed?.suggested_actions),
     summary: typeof parsed?.summary === "string" ? parsed.summary : "",
   };
 }
@@ -141,6 +159,7 @@ Analyze the following journal entry and return STRICTLY valid JSON with this exa
   "emotion": "string",
   "themes": ["string", "string"],
   "reflection_prompts": ["string", "string", "string"],
+  "suggested_actions": ["string", "string", "string"],
   "summary": "string"
 }
 
@@ -148,6 +167,8 @@ Rules:
 - Output only JSON, no markdown.
 - themes should contain 2-5 short theme phrases.
 - reflection_prompts should contain exactly 3 thoughtful prompts.
+- suggested_actions should contain 1-3 micro actions that can be completed in about 5 to 10 minutes.
+- Each action must be a short supportive step, written in second person or imperative style.
 - summary should be 1-2 concise sentences.
 
 Journal entry:

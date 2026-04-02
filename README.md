@@ -108,6 +108,7 @@ Solid lines: main journaling + AI path. Dotted: demo sign-in via Lambda (custom 
 
 - **Journaling + AI Insight**
   - Analyze entries for emotion, themes, summary, and reflection prompts
+  - Generate `suggested_actions` as micro next steps the user can do in a few minutes
   - Successful analyses are persisted automatically (no extra “save” step for the insight flow)
 - **Analytics**
   - Emotion trends and dashboard copy use **AI-analyzed** journal entries only (entries saved without insight are not counted as “Unknown”)
@@ -132,6 +133,7 @@ Because this project was built for an AWS hackathon, the serverless backend is i
 - Lambda validates input and handles CORS
 - Lambda calls Gemini and enforces a stable JSON output schema
 - The system prompt instructs Gemini to act as a mental wellness reflection assistant and return strictly valid JSON (no markdown)
+- `suggested_actions` is normalized to 1 to 3 micro actions for UI consistency
 - `reflection_prompts` is normalized to exactly 3 items for UI consistency
 - Errors are mapped to user-safe responses (`400`, `429`, `500/502`)
 
