@@ -6,24 +6,20 @@ export default function PublicLayout() {
   const year = new Date().getFullYear();
   return (
     <div
-      className={`min-h-screen text-slate-800 relative overflow-hidden ${
+      className={`min-h-screen text-slate-800 relative overflow-hidden flex flex-col ${
         isDark
           ? "bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950"
           : "bg-gradient-to-b from-orange-50 via-amber-50 to-emerald-50"
       }`}
     >
       <div
-        className={`pointer-events-none rounded-full blur-3xl animate-pulse h-72 w-72 ${
-          isDark
-            ? "absolute -top-20 -left-10 bg-amber-300/22"
-            : "absolute -top-20 -right-10 bg-orange-200/35"
+        className={`pointer-events-none absolute -top-20 -right-10 h-64 w-64 rounded-full blur-3xl animate-pulse ${
+          isDark ? "bg-amber-700/20" : "bg-orange-200/35"
         }`}
       />
       <div
-        className={`pointer-events-none rounded-full blur-3xl animate-pulse ${
-          isDark
-            ? "absolute top-36 -right-16 h-72 w-72 bg-[#AAF0D1]/30"
-            : "absolute top-40 -left-12 h-60 w-60 bg-emerald-200/35"
+        className={`pointer-events-none absolute top-40 -left-12 h-52 w-52 rounded-full blur-3xl animate-pulse ${
+          isDark ? "bg-emerald-700/20" : "bg-emerald-200/35"
         }`}
       />
       <header
@@ -99,7 +95,7 @@ export default function PublicLayout() {
           </div>
         </nav>
       </header>
-      <main className="max-w-7xl mx-auto px-4 py-10">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-10">
         <Outlet />
       </main>
       <footer
