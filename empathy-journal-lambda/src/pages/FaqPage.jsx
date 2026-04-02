@@ -14,18 +14,13 @@ export default function FaqPage() {
         <h1 className="text-4xl font-bold text-amber-700 dark:text-[#AAF0D1] mb-8">FAQ</h1>
         <div className="space-y-3">
           {faqs.map(([q, a]) => (
-            <details
+            <div
               key={q}
-              className="block w-full bg-white border border-slate-200 rounded-xl p-4"
+              className="w-full bg-white border border-slate-200 rounded-xl p-4"
             >
-              <summary
-                style={{ width: "100%", display: "flex" }}
-                className="w-full cursor-pointer list-none font-semibold text-slate-800 text-left"
-              >
-                <span className="flex-1">{q}</span>
-              </summary>
+              <h2 className="font-semibold text-slate-800 text-left">{q}</h2>
               <p className="mt-2 w-full text-slate-600">{a}</p>
-            </details>
+            </div>
           ))}
         </div>
       </div>
