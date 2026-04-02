@@ -85,6 +85,11 @@ export default function AppLayout() {
             "What helped you feel even 5% calmer today?",
             "What would you tell a friend in the same situation?",
           ],
+          suggested_actions: [
+            "In the next 2 minutes, take 5 slow breaths and write one sentence about what you can control.",
+            "Drink a glass of water or tea and notice how your body feels right now.",
+            "Choose one tiny next step for the next 10 minutes and start.",
+          ],
           summary: "You’re feeling anxious and looking for practical ways to regain control and build a steadier routine.",
         },
         createdAt: ts(daysAgo(1)),
@@ -99,6 +104,11 @@ export default function AppLayout() {
             "What made today feel quietly good?",
             "How can you recreate this kind of day on purpose?",
             "What boundary supports your peace the most?",
+          ],
+          suggested_actions: [
+            "Write one thing you want to protect and set a small boundary for it today.",
+            "Take a 10 minute restful break with no screens if possible.",
+            "Send one kind note to someone or write a short message you wish you could hear.",
           ],
           summary: "You’re experiencing calm happiness and want to sustain it through intentional rest and boundaries.",
         },
