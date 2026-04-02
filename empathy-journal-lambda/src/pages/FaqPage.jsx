@@ -10,18 +10,18 @@ const faqs = [
 export default function FaqPage() {
   return (
     <PageFade>
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-amber-700 dark:text-[#AAF0D1] mb-8">FAQ</h1>
-        <div className="space-y-6">
+        <div className="space-y-4">
           {faqs.map(([q, a]) => (
             <details
               key={q}
-              className="w-full bg-white border border-slate-200 rounded-2xl px-8 py-6 min-h-[140px]"
+              className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 min-h-[120px]"
             >
-              <summary className="cursor-pointer w-full font-semibold text-slate-800 list-none text-xl">
+              <summary className="cursor-pointer w-full font-semibold text-slate-800 list-none text-lg">
                 {q}
               </summary>
-              <p className="mt-4 text-slate-600 leading-relaxed text-lg">{a}</p>
+              <p className="mt-3 text-slate-600 leading-relaxed text-base">{a}</p>
             </details>
           ))}
         </div>
