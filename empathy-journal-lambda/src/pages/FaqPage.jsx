@@ -18,8 +18,11 @@ export default function FaqPage() {
               key={q}
               className="block w-full bg-white border border-slate-200 rounded-xl p-4"
             >
-              <summary className="block w-full cursor-pointer list-none font-semibold text-slate-800">
-                {q}
+              <summary
+                style={{ width: "100%", display: "flex" }}
+                className="w-full cursor-pointer list-none font-semibold text-slate-800 text-left"
+              >
+                <span className="flex-1">{q}</span>
               </summary>
               <p className="mt-2 w-full text-slate-600">{a}</p>
             </details>
