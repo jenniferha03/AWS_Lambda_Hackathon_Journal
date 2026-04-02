@@ -9,11 +9,14 @@ const posts = [
 export default function BlogPage() {
   return (
     <PageFade>
-      <div>
+      <div className="w-full max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-amber-700 dark:text-[#AAF0D1] mb-8">Blog</h1>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {posts.map((p) => (
-            <article key={p.title} className="bg-white border border-slate-200 rounded-xl p-4">
+            <article
+              key={p.title}
+              className="w-full bg-white border border-slate-200 rounded-xl px-5 py-4"
+            >
               <p className="text-xs text-slate-500">{p.date}</p>
               <h2 className="font-semibold text-slate-800">{p.title}</h2>
             </article>
