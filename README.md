@@ -1,12 +1,49 @@
-# Empathy Journal: Reflection.ai
+# Empathy Journal: Reflection.ai 🌿
 
-Empathy Journal is a journaling web app that helps users reflect, understand emotional patterns, and build consistent writing habits. It combines a calm writing experience with AI-generated insights and simple wellness tools.
+Empathy Journal is a digital space designed to help users reflect on their thoughts, understand emotional patterns, and build consistent mental health habits. It combines a minimalist writing experience with structured AI insights and a wellness toolkit.
 
 - **Live demo**: `https://empathy-journal.vercel.app/`
+- **Design**: [Figma workspace](https://www.figma.com/design/dELc6U7AwXP7aTnvTC5mnl/Empathy-Journal-AWS-Hackathon?node-id=0-1)
 
 ## Screenshot
 
 ![Landing page](./docs/assets/landing-photo.png)
+
+---
+
+## 🎯 Project Overview
+
+### The Problem
+Traditional journaling often feels like a one way street where thoughts are stored but rarely processed. During high stress periods, users can feel overwhelmed and lack immediate perspective or the right questions to help them navigate their emotions.
+
+### The Solution
+Empathy Journal acts as a supportive companion. It uses a serverless backend to analyze journal entries and provide structured Reflection Prompts that guide self discovery. To encourage consistency, it visualizes writing streaks as a gamified Digital Garden.
+
+### ✨ Key Features
+
+- Smart Journaling: on demand AI insight analysis for emotion, core themes, summary, and reflection prompts
+- Reflection Prompts: automatically generates three tailored questions per analysis
+- The Garden: a gamified streak garden that grows with consistent writing days
+- Wellness Toolkit: includes a Pomodoro focus timer, ambient calm sounds, and a micro habit tracker with study todo support
+- Auto Persistence: AI insight flow is automatically saved to Firestore so entries and insights remain available across sessions (demo content is cleared on logout)
+
+### 🚧 Challenges I ran into
+
+- AWS and AI Integration: building a reliable contract between Lambda and Gemini. I enforced a strict JSON schema and normalized the output so the frontend can render safely
+- CORS and browser integration: configuring API Gateway and Lambda CORS headers for browser requests and handling error responses safely
+- State Management: syncing Firestore real time listeners with the AI insight flow while maintaining clean UI state transitions
+
+### 🏆 Accomplishments that I am proud of
+
+- Successful serverless implementation: built a fully functional, secure, and scalable backend on AWS powering AI insights
+- High quality AI prompt and schema design: crafted a prompt that returns stable JSON for UI fields including emotion, themes, summary, and reflection prompts
+- User centric product delivery: end to end journaling, Digital Garden streak analytics, and a wellness toolkit that keeps the experience calm
+
+### 📚 What I learned
+
+- AWS ecosystem: deeper understanding of Lambda, API Gateway, and CloudWatch observability
+- AI orchestration: refining prompt and output contracts and validating results through API calls and UI behavior
+- Product ownership: balancing technical complexity with a simple, healing user experience
 
 ---
 
@@ -60,7 +97,7 @@ Solid lines: main journaling + AI path. Dotted: demo sign-in via Lambda (custom 
 
 - **Frontend**: React, Vite, Tailwind CSS, React Router
 - **Auth / Database**: Firebase Auth, Firestore
-- **Backend**: AWS Lambda (Node.js), API Gateway, Firebase Admin (e.g. demo custom tokens), `@google/generative-ai` (JavaScript SDK for the **Gemini API**)
+- **Backend**: AWS Lambda (Node.js), API Gateway, Firebase Admin (e.g. demo custom tokens), Gemini integration via REST call + strict JSON normalization
 - **AI**: Google Gemini (`gemini-2.5-flash`)
 - **Observability / Testing**: CloudWatch Logs, Postman/Hoppscotch, local smoke test script
 - **Deployment**: Vercel (frontend), AWS Lambda (backend)
@@ -74,7 +111,7 @@ Solid lines: main journaling + AI path. Dotted: demo sign-in via Lambda (custom 
   - Successful analyses are persisted automatically (no extra “save” step for the insight flow)
 - **Analytics**
   - Emotion trends and dashboard copy use **AI-analyzed** journal entries only (entries saved without insight are not counted as “Unknown”)
-  - Streak visualization for writing consistency
+  - **Digital Garden (streak garden)** grows from consistent writing days to visualize progress and keep users engaged
 - **Toolkit**
   - Focus mode (Pomodoro), calm sounds, micro-habits, study todo list
 - **Authentication + Profile**
@@ -94,6 +131,7 @@ Because this project was built for an AWS hackathon, the serverless backend is i
 
 - Lambda validates input and handles CORS
 - Lambda calls Gemini and enforces a stable JSON output schema
+- The system prompt instructs Gemini to act as a mental wellness reflection assistant and return strictly valid JSON (no markdown)
 - `reflection_prompts` is normalized to exactly 3 items for UI consistency
 - Errors are mapped to user-safe responses (`400`, `429`, `500/502`)
 
@@ -156,8 +194,8 @@ For full design and implementation docs, see:
 
 ## Future Roadmap
 
-- Add route-level code splitting and further bundle optimization
-- Improve AI reliability UX (retry/fallback handling on quota/timeouts)
-- Expand test coverage (frontend components + API contract checks)
-- Add offline draft support (PWA-style behavior)
-- Support richer export options (PDF/Markdown)
+- Optimization: add route-level code splitting and further bundle optimization
+- Resilience: improve AI fallback handling for quota limits or timeouts
+- Engagement: implement chat summarization and personalized mood-based music suggestions
+- Privacy: explore end-to-end encryption for sensitive journal content
+- Quality: expand test coverage (frontend components and API contract checks)
