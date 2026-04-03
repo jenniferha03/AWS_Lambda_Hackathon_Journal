@@ -1,6 +1,4 @@
-# Backend Implementation — AWS Lambda + Gemini (Interview Walkthrough)
-
-This document is a **talk track** you can use when screen-sharing in an interview.
+# Backend Implementation — AWS Lambda + Gemini
 
 ---
 
