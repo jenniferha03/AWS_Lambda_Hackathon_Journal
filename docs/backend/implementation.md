@@ -1,6 +1,5 @@
 # Backend Implementation — AWS Lambda + Gemini
 
----
 
 ## 1) What I built (hackathon focus)
 
